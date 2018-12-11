@@ -1,0 +1,29 @@
+subprojects {
+
+    group 'zwei'
+    version '1.0-SNAPSHOT'
+
+    apply plugin: 'java'
+    sourceCompatibility = 1.8
+
+    repositories {
+        mavenCentral()
+    }
+
+    dependencies {
+        implementation group: 'org.jetbrains', name: 'annotations', version: '16.0.3'
+
+        runtimeOnly group: 'org.apache.derby', name: 'derby', version: '10.14.2.0'
+        runtimeOnly group: 'mysql', name: 'mysql-connector-java', version: '8.0.13'
+
+        testImplementation group: 'junit', name: 'junit', version: '4.12'
+        testImplementation group: 'org.assertj', name: 'assertj-core', version: '3.11.1'
+        testImplementation group: 'org.mockito', name: 'mockito-core', version: '2.23.4'
+    }
+}
+
+project(":ui") {
+    dependencies {
+        implementation project(":db")
+    }
+}

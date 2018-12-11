@@ -1,0 +1,4 @@
+rootProject.name = 'syk'
+include 'ui'
+include 'db'
+
