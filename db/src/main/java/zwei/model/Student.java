@@ -1,6 +1,5 @@
 package zwei.model;
 
-import org.intellij.lang.annotations.Language;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import zwei.JDBCUtilities;
@@ -13,9 +12,11 @@ import java.util.List;
 public class Student extends User {
 
   @NotNull private String name;
-  @NotNull private ClassUnit belongClass;
-  @NotNull private String subject;
-  @NotNull private List<Course> joinedCourses = new LinkedList<>();
+  @NotNull private String className;
+  @NotNull private String majorName;
+
+  private Student() {}
+
 
   public void persist(Connection conn) {
     persistOne(conn, this);
@@ -27,12 +28,21 @@ public class Student extends User {
 
   /* Static Methods */
 
+  public static Student createAccount(@NotNull String id, @NotNull String name,
+      @NotNull String password) {
+    Student created = new Student();
+    created.name = name;
+    created.uid = id;
+    created.setPassword(password);
+    return created;
+  }
+
   public static void createTable(@NotNull Connection conn) {
     JDBCUtilities.executeSqlFromResource(conn, "sql/init_student.ddl.sql");
   }
 
   public static void populateTable(@NotNull Connection conn) {
-    JDBCUtilities.executeUpdateSqlFromResource(conn, "sql/dump_student.ddl.sql");
+    JDBCUtilities.executeUpdateSqlFromResource(conn, "sql/dump.sql");
   }
 
   @NotNull
@@ -48,10 +58,15 @@ public class Student extends User {
     return Collections.emptyList();
   }
 
+  /**
+   * 通过id获取一个Student
+   */
   @SuppressWarnings("Duplicates")
   @Nullable
-  public static Student retrieveOne(@NotNull Connection conn, String uid) {
-    String sql = "select * from student where id=?1";
+  public static Student retrieveOne(Connection conn, String uid) {
+    if (uid == null) return null;
+
+    String sql = "select * from student where id=?";
     try (PreparedStatement statement = conn.prepareStatement(sql)) {
       statement.setString(1, uid);
       List<Student> list = parseResultSet(statement.executeQuery());
@@ -62,24 +77,31 @@ public class Student extends User {
     return null;
   }
 
-  public static void persistOne(Connection conn, Student stu) {
-    String sql = "insert into student (id, password, name, class_id, subject) "
-        + "values (?1, ?2, ?3, ?4, ?5)";
-    populateStatement(conn, stu, sql);
-  }
-
-  public static void updateOne(Connection conn, Student stu) {
-    String sql = "update student set password=?2, name=?3, class_id=?4, subject=?5 where id = ?1";
-    populateStatement(conn, stu, sql);
-  }
-
-  private static void populateStatement(Connection conn, Student stu, @Language("sql") String sql) {
+  public static boolean persistOne(Connection conn, Student stu) {
+    String sql =
+        "insert into student (id, password, name, class_name, major_name) values (?, ?, ?, ?, ?)";
     try (PreparedStatement statement = conn.prepareStatement(sql)) {
       statement.setString(1, stu.uid);
       statement.setString(2, stu.password);
       statement.setString(3, stu.name);
-      statement.setLong(4, stu.belongClass.getId());
-      statement.setString(5, stu.subject);
+      statement.setString(4, stu.className);
+      statement.setString(5, stu.majorName);
+      statement.executeUpdate();
+      return true;
+    } catch (SQLException e) {
+      JDBCUtilities.printSQLException(e);
+    }
+    return false;
+  }
+
+  public static void updateOne(Connection conn, Student stu) {
+    String sql = "update student set password=?, name=?, class_name=?, major_name=? where id=?";
+    try (PreparedStatement statement = conn.prepareStatement(sql)) {
+      statement.setString(1, stu.password);
+      statement.setString(2, stu.name);
+      statement.setString(3, stu.className);
+      statement.setString(4, stu.majorName);
+      statement.setString(5, stu.uid);
       statement.executeUpdate();
     } catch (SQLException e) {
       JDBCUtilities.printSQLException(e);
@@ -91,14 +113,14 @@ public class Student extends User {
     List<Student> students = new LinkedList<>();
     try {
       while (resultSet.next()) {
-        // @formatter:off
+
         Student s     = new Student();
-        s.uid         = resultSet.getString("uid");
+        s.uid         = resultSet.getString("id");
         s.password    = resultSet.getString("password");
         s.name        = resultSet.getString("name");
-        s.belongClass = ClassUnit.reference(resultSet.getLong("class_id"));
-        s.subject     = resultSet.getString("subject");
-        // @formatter:on
+        s.className = resultSet.getString("class_name");
+        s.majorName = resultSet.getString("major_name");
+
         students.add(s);
       }
     } catch (SQLException e) {
@@ -122,13 +144,13 @@ public class Student extends User {
   }
 
   /** 获取学生班级 */
-  public ClassUnit getStudentGrade() {
-    return belongClass;
+  public String getStudentGrade() {
+    return className;
   }
 
   /** 获取学生专业 */
   public String getStudentSubject() {
-    return subject;
+    return majorName;
   }
 
 }

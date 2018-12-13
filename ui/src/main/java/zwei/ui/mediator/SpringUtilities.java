@@ -40,7 +40,7 @@ import java.awt.*;
  * These utilities are used by several programs, such as
  * SpringBox and SpringCompactGrid.
  */
-public final class SpringUtilities {
+final class SpringUtilities {
 
   private SpringUtilities() {}
 

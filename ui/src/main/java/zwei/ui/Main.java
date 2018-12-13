@@ -1,6 +1,8 @@
 package zwei.ui;
 
+import zwei.JDBCUtilities;
 import zwei.ui.mediator.SplashInterface;
+import zwei.ui.mediator.UserInterface;
 
 import javax.swing.*;
 
@@ -12,16 +14,26 @@ import javax.swing.*;
 public final class Main {
 
   public static void main(String[] args) throws Exception {
+    String propertyFile = args.length == 0 ? "app.properties" : args[0];
+
+    try {
+      JDBCUtilities.getInstance(propertyFile);
+    } catch (Exception e) {
+      System.out.println("Problem reading properties file " + propertyFile);
+      return;
+    }
+
     System.setProperty("apple.laf.useScreenMenuBar", "true");
     System.setProperty("apple.awt.application.name", "成绩管理");
+    System.setProperty("apple.eawt.quitStrategy", "CLOSE_ALL_WINDOWS");
     UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
     SwingUtilities.invokeAndWait(Main::createAndShowGUI);
   }
 
   private static void createAndShowGUI() {
-    JFrame frame = new JFrame("成绩管理");
-    frame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
-    SplashInterface splashInterface = new SplashInterface();
+    JFrame frame = new JFrame();
+    frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+    UserInterface splashInterface = new SplashInterface();
     splashInterface.showInFrame(frame);
     frame.pack();
     frame.setLocationRelativeTo(null);

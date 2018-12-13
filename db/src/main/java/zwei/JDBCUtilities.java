@@ -1,12 +1,21 @@
 package zwei;
 
+import org.intellij.lang.annotations.Language;
+
+import javax.sql.rowset.CachedRowSet;
+import javax.sql.rowset.RowSetProvider;
+import javax.swing.*;
 import java.io.*;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.*;
 import java.util.Properties;
+import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -19,14 +28,60 @@ public final class JDBCUtilities {
   private String dbUrl;
   private String username;
   private String password;
+  private static JDBCUtilities self;
+  private Connection connection;
 
-  private JDBCUtilities() {}
+  private JDBCUtilities(String propertiesFile) {
+    setProperties(propertiesFile);
+  }
 
+  public static JDBCUtilities getInstance() {
+    if (self == null) {
+      self = getInstance("app.properties");
+    }
+    return self;
+  }
+
+  public static JDBCUtilities getInstance(String propertiesFile) {
+    if (self == null) {
+      self = new JDBCUtilities(propertiesFile);
+      self.connection = self.getConnection();
+    }
+    return self;
+  }
+
+  /** 连接到数据库，以sql的结果创建RowSet对象 */
+  public CachedRowSet newCachedRowSet(@Language("sql") String sql) {
+    CachedRowSet crs;
+    try {
+      crs = RowSetProvider.newFactory().createCachedRowSet();
+      crs.setType(ResultSet.TYPE_SCROLL_INSENSITIVE);
+      crs.setConcurrency(ResultSet.CONCUR_UPDATABLE);
+      crs.setCommand(sql);
+    } catch (SQLException e) {
+      printSQLException(e);
+      throw new RuntimeException(e);
+    }
+    return crs;
+  }
+
+  /** @throws NullPointerException cannot get connection */
   @SuppressWarnings("CallToDriverManagerGetConnection")
-  public Connection getConnection() throws SQLException {
-    Connection connection = DriverManager.getConnection(dbUrl, username, password);
-    System.out.println("Connected to database");
-    return connection;
+  public Connection getConnection() {
+    try {
+      if (connection != null && connection.isValid(2)) return connection;
+
+      Connection conn = DriverManager.getConnection(dbUrl, username, password);
+      if (conn != null) {
+        System.out.println("Connected to database");
+        return conn;
+      }
+    } catch (SQLException e) {
+      printSQLException(e);
+    }
+
+    JOptionPane.showMessageDialog(null, "无法连接到数据库", "错误", JOptionPane.ERROR_MESSAGE);
+    throw new NullPointerException("connection is null");
   }
 
   public static void executeSqlFromResource(Connection conn, String resourcePath) {
@@ -95,23 +150,48 @@ public final class JDBCUtilities {
     }
   }
 
-  private void setProperties(String fileName) throws IOException {
+  /** @throws RuntimeException reading failed */
+  private void setProperties(String fileName) {
     Properties prop = new Properties();
+
     Path path = Paths.get(fileName);
+    if (!Files.exists(path)) {
+      try {
+        URL resource = getClass().getClassLoader().getResource(fileName);
+        if (resource != null) {
+          path = Paths.get(resource.toURI());
+        }
+      } catch (URISyntaxException ignored) {}
+    }
     try (InputStream fis = Files.newInputStream(path)) {
       prop.load(fis);
+    } catch (IOException e) {
+      throw new RuntimeException(e);
     }
 
     this.dbUrl = prop.getProperty("db.url");
     this.username = prop.getProperty("db.username");
     this.password = prop.getProperty("db.password");
-
-    System.out.println("Set the following properties:");
-    System.out.println("username: " + username);
-    System.out.println("password: " + password);
-    System.out.println("url string: " + dbUrl);
+    //
+    // System.out.println("Set the following properties:");
+    // System.out.println("url string: " + dbUrl);
+    // System.out.println("username: " + username);
+    // System.out.println("password: " + password);
   }
 
+  /** Database operation */
+  @SuppressWarnings("SpellCheckingInspection")
+  public static void dbop(Consumer<? super Connection> function) {
+    Connection connection = getInstance().getConnection();
+    function.accept(connection);
+  }
+
+  /** Database operation */
+  @SuppressWarnings("SpellCheckingInspection")
+  public static <R> R dbop(Function<? super Connection, R> function) {
+    Connection connection = getInstance().getConnection();
+    return function.apply(connection);
+  }
 
   public static void printWarnings(SQLWarning warning) throws SQLException {
     if (warning != null) {
@@ -127,6 +207,8 @@ public final class JDBCUtilities {
   }
 
   public static void printSQLException(SQLException ex) {
+    SwingUtilities.invokeLater(() -> JOptionPane.showMessageDialog(null,
+        ex.getMessage(), "SQL错误", JOptionPane.ERROR_MESSAGE));
     for (Throwable e : ex) {
       e.printStackTrace();
 

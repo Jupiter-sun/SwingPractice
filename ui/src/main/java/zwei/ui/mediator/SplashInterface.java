@@ -1,16 +1,23 @@
 package zwei.ui.mediator;
 
+import zwei.JDBCUtilities;
+import zwei.model.Student;
+import zwei.model.Teacher;
+import zwei.model.User;
+
 import javax.swing.*;
 import java.awt.event.ActionEvent;
+import java.util.function.Supplier;
 
 /**
  * Created on 2018-12-11
  *
  * @author 九条涼果 chunxiang.huang@hypers.com
  */
-public class SplashInterface extends JPanel {
+public class SplashInterface extends JPanel implements UserInterface {
 
   private static final long serialVersionUID = 5251739093646189753L;
+
   private JTextField idField;
   private JTextField pwField;
 
@@ -24,10 +31,12 @@ public class SplashInterface extends JPanel {
     createSelf();
   }
 
+  @Override
   public void showInFrame(JFrame parent) {
     parent.setContentPane(this);
     parent.getRootPane().setDefaultButton(loginBtn);
     parent.setTitle("用户登录");
+    parent.pack();
   }
 
   @SuppressWarnings("Duplicates")
@@ -70,24 +79,74 @@ public class SplashInterface extends JPanel {
     lstPanel.add(loginBtn);
 
     setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
-    add(Box.createGlue());
+    setBorder(paddingBorder);
     add(topPanel);
     add(midPanel);
     add(lstPanel);
   }
 
+  /** @see #loginBtn */
   private void clickLogin(ActionEvent actionEvent) {
-    System.out.println(pwField.getText());
+    String inputId       = idField.getText();
+    String inputPassword = pwField.getText();
+
+    if (inputId == null || inputId.isEmpty()) {
+      idField.requestFocusInWindow();
+      return;
+    }
+    if (inputPassword == null || inputPassword.isEmpty()) {
+      pwField.requestFocusInWindow();
+      return;
+    }
+
+    User                    user;
+    Supplier<UserInterface> Interface;
+    if (stuRadioBtn.isSelected()) {
+      user = JDBCUtilities.dbop(conn -> {return Student.retrieveOne(conn, inputId);});
+      Interface = StudentInterface::new;
+    } else if (teaRadioBtn.isSelected()) {
+      user = JDBCUtilities.dbop(conn -> {return Teacher.retrieveOne(conn, inputId);});
+      Interface = TeacherInterface::new;
+    } else {
+      JOptionPane.showMessageDialog(this, "单选框未选中", "异常发生", JOptionPane.WARNING_MESSAGE);
+      return;
+    }
+
+    if (user == null) {
+      JOptionPane.showMessageDialog(this, "用户不存在", "登录失败", JOptionPane.WARNING_MESSAGE);
+      return;
+    }
+
+    if (user.comparePassword(inputPassword)) {
+      switchPanel(Interface.get());
+    } else {
+      JOptionPane.showMessageDialog(this, "密码错误", "登录失败", JOptionPane.WARNING_MESSAGE);
+    }
   }
 
+  /** @see #registerBtn */
   private void clickRegister(ActionEvent actionEvent) {
+    switchPanel(new RegisterInterface());
+  }
+
+  /**
+   * Replace window's content panel to new user interface, take user to next step.
+   */
+  private void switchPanel(UserInterface Interface) {
     JFrame frame = (JFrame) SwingUtilities.windowForComponent(this);
-
-    RegisterInterface registerInterface = new RegisterInterface();
-
     // replace content panel
     setVisible(false);
-    registerInterface.showInFrame(frame);
+    Interface.showInFrame(frame);
+    // no need to pack
+  }
+
+  /** Preview UI */
+  public static void main(String[] args) {
+    JFrame frame = new JFrame();
+    UserInterface Interface = new SplashInterface();
+    Interface.showInFrame(frame);
+    frame.setLocationRelativeTo(null);
+    frame.setVisible(true);
   }
 }
 

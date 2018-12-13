@@ -13,7 +13,6 @@ import java.util.List;
 public class Teacher extends User {
 
   @NotNull private String name;
-  @NotNull private List<ClassUnit> taughtClasses;
 
   public void persist(Connection conn) {
     persistOne(conn, this);
@@ -24,10 +23,6 @@ public class Teacher extends User {
   }
 
   /* Static Methods */
-
-  public static void createTable(@NotNull Connection conn) {
-    JDBCUtilities.executeSqlFromResource(conn, "sql/init_teacher.ddl.sql");
-  }
 
   @NotNull
   public static List<Teacher> retrieveALl(Connection conn) {

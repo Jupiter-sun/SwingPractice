@@ -1,10 +1,14 @@
 package zwei.ui.mediator;
 
+import zwei.JDBCUtilities;
+import zwei.model.Student;
+
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 
-public class RegisterInterface extends JPanel {
+public class RegisterInterface extends JPanel implements UserInterface {
 
   private static final long serialVersionUID = -5795654569586694048L;
 
@@ -21,12 +25,12 @@ public class RegisterInterface extends JPanel {
     createSelf();
   }
 
+  @Override
   public void showInFrame(JFrame parent) {
     parentState = backup(parent);
     parent.setContentPane(this);
     parent.getRootPane().setDefaultButton(registerBtn);
     parent.setTitle("用户注册");
-    setVisible(true);
   }
 
   @SuppressWarnings("Duplicates")
@@ -63,11 +67,24 @@ public class RegisterInterface extends JPanel {
     lstPanel.add(registerBtn);
 
     setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+    setBorder(new EmptyBorder(10, 10, 10, 10));
     add(midPanel);
     add(lstPanel);
   }
 
   private void clickRegister(ActionEvent actionEvent) {
+    String inputId       = idField.getText();
+    String inputName     = nmField.getText();
+    String inputPassword = pwField.getText();
+
+    Student newlyCreated = Student.createAccount(inputId, inputName, inputPassword);
+    boolean success = JDBCUtilities.dbop((conn) -> {return Student.persistOne(conn, newlyCreated);});
+    if (success) {
+      backward(actionEvent); // return to previous page
+    } else {
+      idField.transferFocus();
+      idField.selectAll();
+    }
   }
 
   private void backward(ActionEvent actionEvent) {
