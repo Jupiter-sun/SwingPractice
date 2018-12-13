@@ -33,6 +33,9 @@ public class RegisterInterface extends JPanel implements UserInterface {
     parent.setTitle("用户注册");
   }
 
+  @Override
+  public void putArgument(String key, Object value) { }
+
   @SuppressWarnings("Duplicates")
   private void createSelf() {
     idField = new JTextField();

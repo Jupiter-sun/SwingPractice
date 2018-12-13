@@ -3,6 +3,7 @@ package zwei.model;
 import org.jetbrains.annotations.NotNull;
 
 import javax.xml.bind.DatatypeConverter;
+import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -12,8 +13,9 @@ import java.security.NoSuchAlgorithmException;
  *
  * @author 九条涼果 chunxiang.huang@hypers.com
  */
-public abstract class User {
+public abstract class User implements Serializable {
 
+  private static final long serialVersionUID = -6494928338170854982L;
   @NotNull protected String uid;
   @NotNull protected String password;
 
@@ -27,9 +29,7 @@ public abstract class User {
   }
 
   public boolean comparePassword(@NotNull String rawPassword) {
-    System.out.println(password);
     String anObject = hashString(rawPassword);
-    System.out.println(anObject);
     return password.equals(anObject);
   }
 

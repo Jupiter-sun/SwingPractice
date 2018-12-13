@@ -17,6 +17,12 @@ public class Student extends User {
 
   private Student() {}
 
+  public static Student reference(String studentId) {
+    Student student = new Student();
+    student.uid = studentId;
+    return student;
+  }
+
 
   public void persist(Connection conn) {
     persistOne(conn, this);
@@ -35,14 +41,6 @@ public class Student extends User {
     created.uid = id;
     created.setPassword(password);
     return created;
-  }
-
-  public static void createTable(@NotNull Connection conn) {
-    JDBCUtilities.executeSqlFromResource(conn, "sql/init_student.ddl.sql");
-  }
-
-  public static void populateTable(@NotNull Connection conn) {
-    JDBCUtilities.executeUpdateSqlFromResource(conn, "sql/dump.sql");
   }
 
   @NotNull

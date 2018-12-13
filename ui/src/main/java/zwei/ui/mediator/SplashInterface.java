@@ -39,10 +39,13 @@ public class SplashInterface extends JPanel implements UserInterface {
     parent.pack();
   }
 
+  @Override
+  public void putArgument(String key, Object value) { }
+
   @SuppressWarnings("Duplicates")
   private void createSelf() {
-    idField = new JTextField();
-    pwField = new JPasswordField();
+    idField = new JTextField("1000");
+    pwField = new JPasswordField("111");
     JLabel idLabel = new JLabel(" ID:", JLabel.TRAILING);
     JLabel pwLabel = new JLabel("PWD:", JLabel.TRAILING);
     idLabel.setLabelFor(idField);
@@ -118,7 +121,9 @@ public class SplashInterface extends JPanel implements UserInterface {
     }
 
     if (user.comparePassword(inputPassword)) {
-      switchPanel(Interface.get());
+      UserInterface panel = Interface.get();
+      panel.putArgument("user", user);
+      switchPanel(panel);
     } else {
       JOptionPane.showMessageDialog(this, "密码错误", "登录失败", JOptionPane.WARNING_MESSAGE);
     }

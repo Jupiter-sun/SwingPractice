@@ -84,6 +84,15 @@ public final class JDBCUtilities {
     throw new NullPointerException("connection is null");
   }
 
+  public PreparedStatement getPrepareStatement(@Language("SQL") String sql) {
+    try {
+      return getConnection().prepareStatement(sql);
+    } catch (SQLException e) {
+      printSQLException(e);
+      throw new RuntimeException();
+    }
+  }
+
   public static void executeSqlFromResource(Connection conn, String resourcePath) {
     String sql = readStringFromStream(resourcePath);
 

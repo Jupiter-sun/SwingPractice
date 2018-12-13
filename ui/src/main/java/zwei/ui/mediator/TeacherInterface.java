@@ -1,6 +1,7 @@
 package zwei.ui.mediator;
 
 import zwei.JDBCUtilities;
+import zwei.model.Teacher;
 
 import javax.swing.*;
 import java.awt.*;
@@ -16,6 +17,8 @@ import java.sql.Connection;
 public class TeacherInterface extends JPanel implements UserInterface {
 
   private static final long serialVersionUID = -2882649301771472643L;
+
+  private Teacher teacher;
   private JTabbedPane switcher;
   private JPanel studentPanel;
   private JPanel scorePanel;
@@ -51,6 +54,15 @@ public class TeacherInterface extends JPanel implements UserInterface {
         JDBCUtilities.close(connection);
       }
     });
+    parent.setMinimumSize(parent.getSize());
+  }
+
+  @SuppressWarnings("CastToConcreteClass")
+  @Override
+  public void putArgument(String key, Object value) {
+    if ("user".equals(key)) {
+      teacher = (Teacher) value;
+    }
   }
 
   public static void main(String[] args) {

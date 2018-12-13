@@ -10,6 +10,8 @@ import javax.swing.border.Border;
  */
 public interface UserInterface {
 
+  void putArgument(String key, Object value);
+
   void showInFrame(JFrame parent);
 
   Border paddingBorder = BorderFactory.createEmptyBorder(10, 10, 10, 10);

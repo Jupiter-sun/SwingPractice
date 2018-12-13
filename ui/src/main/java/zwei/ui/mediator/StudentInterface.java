@@ -1,11 +1,15 @@
 package zwei.ui.mediator;
 
-import zwei.model.Course;
+import zwei.model.CourseStudentLink;
+import zwei.model.Student;
+import zwei.ui.table.CourseListModel;
 
 import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.border.TitledBorder;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.math.BigDecimal;
 
 /**
  * Created on 2018-12-11
@@ -16,18 +20,20 @@ public class StudentInterface extends JPanel implements UserInterface {
 
   private static final long serialVersionUID = -3427522772908306608L;
 
+  private Student student;
+
   private JLabel idLabel;
   private JLabel nmLabel;
   private JLabel clLabel;
   private JLabel sjLabel;
 
-  private JComboBox<Course> courseDropdown;
+  private JComboBox<String> courseDropdown;
   private JButton searchBtn;
   private JTextArea scoreArea;
+  private CourseListModel courseListModel;
 
   public StudentInterface() {
     createSelf();
-    fillInData();
   }
 
   @SuppressWarnings( {"Duplicates", "MagicNumber"})
@@ -75,7 +81,7 @@ public class StudentInterface extends JPanel implements UserInterface {
     searchBtn = new JButton("查询");
     searchBtn.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-    scoreArea = new JTextArea("物理: 99");
+    scoreArea = new JTextArea();
     Border       lineBorder   = BorderFactory.createLineBorder(Color.DARK_GRAY);
     TitledBorder titledBorder = BorderFactory.createTitledBorder(lineBorder, "分数");
     scoreArea.setBorder(titledBorder);
@@ -86,10 +92,21 @@ public class StudentInterface extends JPanel implements UserInterface {
     rightSubSegment1.add(courseDropdown, BorderLayout.CENTER);
 
     JPanel rightPanel = new JPanel();
-    rightPanel.setLayout(new BoxLayout(rightPanel, BoxLayout.PAGE_AXIS));
-    rightPanel.add(rightSubSegment1);
-    rightPanel.add(searchBtn);
-    rightPanel.add(scoreArea);
+    rightPanel.setLayout(new GridBagLayout());
+
+    GridBagConstraints constraints = new GridBagConstraints();
+    constraints.fill = GridBagConstraints.HORIZONTAL;
+    constraints.weighty = 0;
+    constraints.gridy = 1;
+    rightPanel.add(rightSubSegment1, constraints);
+    constraints.fill = GridBagConstraints.NONE;
+    constraints.gridy = 2;
+    rightPanel.add(searchBtn, constraints);
+    constraints.fill = GridBagConstraints.BOTH;
+    constraints.gridy = 3;
+    constraints.weighty = 1;
+    constraints.weightx = 1;
+    rightPanel.add(scoreArea, constraints);
 
     setLayout(new BorderLayout(12, 0));
     setBorder(BorderFactory.createEmptyBorder(8, 8, 8, 8));
@@ -98,14 +115,53 @@ public class StudentInterface extends JPanel implements UserInterface {
   }
 
   private void fillInData() {
+    idLabel.setText(student.getStudentId());
+    nmLabel.setText(student.getStudentName());
+    clLabel.setText(student.getStudentGrade());
+    sjLabel.setText(student.getStudentSubject());
 
+    courseListModel = new CourseListModel(student);
+    courseDropdown.setModel(courseListModel);
+    searchBtn.addActionListener(this::fireSearch);
+  }
+
+  private void fireSearch(ActionEvent actionEvent) {
+    CourseStudentLink item   = courseListModel.getSelected();
+    BigDecimal        score  = item.getScore();
+    String            course = item.getCourse().getName();
+    scoreArea.append(String.format("%s: %s%n", course, score));
   }
 
   @Override
   public void showInFrame(JFrame parent) {
+    fillInData();
     parent.setContentPane(this);
     parent.setTitle("学生页面");
     parent.pack();
+    parent.setMinimumSize(parent.getSize());
+  }
+
+  @SuppressWarnings("CastToConcreteClass")
+  @Override
+  public void putArgument(String key, Object value) {
+    if ("user".equals(key)) {
+      student = (Student) value;
+    }
+  }
+
+  private static class MyDefaultListCellRenderer extends DefaultListCellRenderer {
+
+    private static final long serialVersionUID = -4861762253451239217L;
+
+    @Override
+    public Component getListCellRendererComponent(JList<?> list, Object value, int index,
+        boolean isSelected, boolean cellHasFocus) {
+      super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+      if (value instanceof CourseStudentLink) {
+        setText(((CourseStudentLink) value).getCourse().getName());
+      }
+      return this;
+    }
   }
 
   public static void main(String[] args) {
