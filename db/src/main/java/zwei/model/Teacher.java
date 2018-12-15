@@ -25,6 +25,12 @@ public class Teacher extends User {
 
   /* Static Methods */
 
+  public static Teacher reference(String teacherId) {
+    Teacher teacher = new Teacher();
+    teacher.uid = teacherId;
+    return teacher;
+  }
+
   public static Teacher createAccount(@NotNull String id, @NotNull String name,
       @NotNull String password) {
     Teacher created = new Teacher();

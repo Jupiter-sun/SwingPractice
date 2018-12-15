@@ -1,5 +1,6 @@
 package zwei.ui.mediator;
 
+import org.jetbrains.annotations.Nullable;
 import zwei.model.Student;
 
 import javax.swing.*;
@@ -142,6 +143,7 @@ public class CreateStudentDialog extends JDialog {
     setMinimumSize(getPreferredSize());
   }
 
+  @Nullable
   public Student getUserInput() {
     return userInput;
   }

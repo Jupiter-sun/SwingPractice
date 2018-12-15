@@ -17,6 +17,7 @@ public class StudentCourseListModel extends AbstractListModel<String>
     implements ComboBoxModel<String> {
 
   private static final long serialVersionUID = -4783417329489491964L;
+
   @Nullable private CourseStudentLink selected;
   private List<CourseStudentLink> scores;
 

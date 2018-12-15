@@ -19,12 +19,6 @@ public class Student extends User {
 
   private Student() {}
 
-  public static Student reference(String studentId) {
-    Student student = new Student();
-    student.uid = studentId;
-    return student;
-  }
-
   public void updateInsertRow(ResultSet rowSet) throws SQLException {
     rowSet.updateString("id", uid);
     rowSet.updateString("password", password);
@@ -42,6 +36,12 @@ public class Student extends User {
   }
 
   /* Static Methods */
+
+  public static Student reference(String studentId) {
+    Student student = new Student();
+    student.uid = studentId;
+    return student;
+  }
 
   public static Student createAccount(@NotNull String id, @NotNull String name,
       @NotNull String password) {

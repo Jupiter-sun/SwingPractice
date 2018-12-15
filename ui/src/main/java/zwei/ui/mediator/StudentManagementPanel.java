@@ -7,7 +7,6 @@ import zwei.ui.table.StudentTableModel;
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
-import javax.swing.table.TableCellRenderer;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 
@@ -40,13 +39,13 @@ public class StudentManagementPanel extends JPanel {
     refreshBtn.addActionListener(this::requestRefresh);
   }
 
-  public void setUser(Teacher teacher) {
-  }
+  public void setUser(Teacher teacher) { }
 
+  @SuppressWarnings("Duplicates")
   public void setMenubar(JMenuBar menuBar) {
-    JMenu menu = new JMenu("学生管理");
-    JMenuItem plusMenu = new JMenuItem("添加学生");
-    JMenuItem minusMenu = new JMenuItem("删除选定学生");
+    JMenu     menu        = new JMenu("学生管理");
+    JMenuItem plusMenu    = new JMenuItem("添加学生");
+    JMenuItem minusMenu   = new JMenuItem("删除选定学生");
     JMenuItem refreshMenu = new JMenuItem("刷新表格");
 
     plusMenu.addActionListener(this::createRow);
@@ -82,7 +81,7 @@ public class StudentManagementPanel extends JPanel {
   @SuppressWarnings("MagicNumber")
   private void createSelf() {
     table = new JTable();
-    setTableRender();
+    UiHelper.setZebraStyle(table, String.class);
 
     searchBox = new JTextField(8);
     searchBox.setMaximumSize(searchBox.getPreferredSize());
@@ -115,18 +114,6 @@ public class StudentManagementPanel extends JPanel {
     setBackground(UserInterface.commonBackGround);
     add(tablePanel);
     add(controlPanel);
-  }
-
-  private void setTableRender() {
-    TableCellRenderer renderer = table.getDefaultRenderer(Object.class);
-    table.setDefaultRenderer(Object.class, (table1, value, isSelected, hasFocus, row, column) -> {
-      Component c =
-          renderer.getTableCellRendererComponent(table1, value, isSelected, hasFocus, row, column);
-      c.setBackground(row % 2 == 0 ? new Color(0xEFF0F1) : new Color(0xF9F9F9));
-      c.setBackground(isSelected ? new Color(0xB4D1F5) : c.getBackground());
-      c.setForeground(isSelected ? Color.BLACK : new Color(0x222426));
-      return c;
-    });
   }
 
   private class MyDocumentListener implements DocumentListener {

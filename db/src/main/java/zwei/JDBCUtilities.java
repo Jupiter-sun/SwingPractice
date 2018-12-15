@@ -96,7 +96,7 @@ public final class JDBCUtilities {
     throw new NullPointerException("connection is null");
   }
 
-  public PreparedStatement getPrepareStatement(@Language("SQL") String sql) {
+  public PreparedStatement createStatement(@Language("SQL") String sql) {
     try {
       return getConnection().prepareStatement(sql);
     } catch (SQLException e) {

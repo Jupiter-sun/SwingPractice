@@ -3,48 +3,53 @@ package zwei.ui.table;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import zwei.JDBCUtilities;
+import zwei.model.Course;
+import zwei.model.CourseStudentLink;
 import zwei.model.Student;
 
-import javax.sql.RowSet;
-import javax.sql.rowset.FilteredRowSet;
-import javax.sql.rowset.Predicate;
+import javax.sql.rowset.CachedRowSet;
 import javax.sql.rowset.spi.SyncProviderException;
 import javax.sql.rowset.spi.SyncResolver;
 import javax.swing.*;
 import javax.swing.table.AbstractTableModel;
+import java.math.BigDecimal;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.text.MessageFormat;
-import java.util.Objects;
 
 /**
- * Created on 2018-12-12
+ * Created on 2018-12-16
  *
  * @author 九条涼果 chunxiang.huang@hypers.com
  */
-public class StudentTableModel extends AbstractTableModel {
+public class TeacherScoreTableModel extends AbstractTableModel {
 
-  private static final long serialVersionUID = -2667246886106680138L;
-  private static String[] columnNames = {"学号", "姓名", "班级", "专业"};
-  private transient FilteredRowSet rowSet;
-  private transient MyPredicate filter;
+  private static final long serialVersionUID = 8099441618718210822L;
+  private static String[] columnNames = {"学号", "姓名", "班级", "专业", "分数"};
 
-  public StudentTableModel() {
-    filter = new MyPredicate();
+  private transient CachedRowSet rowSet;
+  private Course course;
+
+  public void setCourse(Course selectedValue) {
+    course = selectedValue;
     refreshTable();
   }
 
   /** 创建新的行，使用用户输入的数据创建学生账号 */
   @SuppressWarnings("Duplicates")
-  public void createRow(@NotNull Student student) {
+  public void createRow(@NotNull Student student, BigDecimal score) {
+    CourseStudentLink link = CourseStudentLink.createOne(student, course, score);
     try {
       try {
         rowSet.moveToInsertRow();
         int rowNum = rowSet.getRow();
-        student.updateInsertRow(rowSet);
+        link.updateInsertRow(rowSet);
         rowSet.insertRow();
         rowSet.moveToCurrentRow();
         rowSet.acceptChanges();
-        System.out.println("Save student named " + student.getStudentName());
+        System.out.println(MessageFormat.format(
+            "Assign score for student {0} on course {1} to {3} points",
+            student.getStudentName(), course.getName(), score));
         fireTableRowsInserted(rowNum, rowNum);
       } catch (SyncProviderException e) {
         refreshTable();
@@ -66,10 +71,10 @@ public class StudentTableModel extends AbstractTableModel {
     try {
       for (int row : selectedRows) {
         rowSet.absolute(row + 1); // row number start with one
-        String name = rowSet.getString("name");
+        String studentId = rowSet.getString("id"); // FIXME
         rowSet.deleteRow();
         rowSet.acceptChanges();
-        System.out.println("Delete student named " + name);
+        System.out.println("Delete student named " + studentId);
         fireTableRowsDeleted(row, row);
       }
     } catch (SQLException e) {
@@ -79,35 +84,19 @@ public class StudentTableModel extends AbstractTableModel {
   }
 
   public void refreshTable() {
-    rowSet = JDBCUtilities.getInstance()
-        .newRowSet("select id, name, class_name, major_name, password from student");
+    if (course == null) return;
+    rowSet = JDBCUtilities.getInstance().newRowSet(
+        "select id, name, class_name, major_name, score from course_student l join student s on s.id = l.student where l.course = ?",
+        statement -> statement.setLong(1, course.getId()));
 
-    try {
-      rowSet.setFilter(filter);
-      System.out.println("Refresh student table");
-      fireTableDataChanged();
-    } catch (SQLException e) {
-      JDBCUtilities.printSQLException(e);
-    }
-  }
-
-  public void narrowDown(String searchFor) {
-    filter.setKeyword(searchFor);
+    System.out.println("Refresh score table");
     fireTableDataChanged();
   }
 
   @Override
   public int getRowCount() {
-    int count = 0;
-    try {
-      rowSet.beforeFirst();
-      while (rowSet.next()) {
-        count++;
-      }
-    } catch (SQLException e) {
-      JDBCUtilities.printSQLException(e);
-    }
-    return count;
+    if (rowSet == null) return 0;
+    return rowSet.size();
   }
 
   @Override
@@ -116,18 +105,14 @@ public class StudentTableModel extends AbstractTableModel {
   }
 
   @Override
-  public String getColumnName(int column) {
-    return columnNames[column];
-  }
-
-  @Override
   public Class<?> getColumnClass(int columnIndex) {
+    if (columnIndex == columnNames.length - 1) return BigDecimal.class;
     return String.class;
   }
 
   @Override
   public boolean isCellEditable(int rowIndex, int columnIndex) {
-    return columnIndex > 0;
+    return columnIndex == columnNames.length - 1;
   }
 
   @Nullable
@@ -150,53 +135,26 @@ public class StudentTableModel extends AbstractTableModel {
   public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
     try {
       rowSet.absolute(rowIndex + 1);
-      String originalValue = rowSet.getString(columnIndex + 1);
-      String newValue      = (String) aValue;
-      if (Objects.equals(originalValue, newValue)) return;
-      rowSet.updateString(columnIndex + 1, newValue);
-      rowSet.updateRow();
-      rowSet.acceptChanges();
-      String id  = rowSet.getString("id");
-      String col = getColumnName(columnIndex);
+      BigDecimal originalValue = rowSet.getBigDecimal(columnIndex + 1);
+      BigDecimal newValue      = (BigDecimal) aValue;
+      String     studentId     = rowSet.getString("id");
+      if (originalValue != null && originalValue.compareTo(newValue) == 0) return;
+      try (
+          PreparedStatement statement = JDBCUtilities.getInstance().createStatement(
+              "update course_student set score = ? where course=? and student =?")) {
+        statement.setBigDecimal(1, newValue);
+        statement.setLong(2, course.getId());
+        statement.setString(3, studentId);
+        statement.executeUpdate();
+      }
+      String studentName = rowSet.getString("name");
+      String courseName  = course.getName();
       System.out.println(MessageFormat.format(
-          "Update student id {0} column {1} from {2} to {3}", id, col, originalValue, newValue));
+          "Update score for student {0} in course {1} from {2} to {3}", studentName, courseName,
+          originalValue, newValue));
     } catch (SQLException e) {
       JDBCUtilities.printSQLException(e);
       refreshTable();
-    }
-  }
-
-  private static class MyPredicate implements Predicate {
-
-    private String keyword;
-
-    void setKeyword(String keyword) {
-      this.keyword = keyword;
-    }
-
-    @Override
-    public boolean evaluate(RowSet rs) {
-      if (keyword == null || keyword.isEmpty()) return true;
-
-      try {
-        String name = rs.getString("name");
-        if (name != null && name.contains(keyword)) {
-          return true;
-        }
-      } catch (SQLException e) {
-        return false;
-      }
-      return false;
-    }
-
-    @Override
-    public boolean evaluate(Object value, int column) {
-      return true;
-    }
-
-    @Override
-    public boolean evaluate(Object value, String columnName) {
-      return true;
     }
   }
 }
