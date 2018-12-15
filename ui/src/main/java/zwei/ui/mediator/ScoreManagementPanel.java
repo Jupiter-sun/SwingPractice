@@ -10,4 +10,6 @@ public class ScoreManagementPanel extends JPanel {
   private JButton minusBtn;
   private JTextField searchBox;
 
+  public void setMenubar(JMenuBar menuBar) {
+  }
 }

@@ -39,6 +39,21 @@ public class StudentManagementPanel extends JPanel {
     refreshBtn.addActionListener(this::requestRefresh);
   }
 
+  public void setMenubar(JMenuBar menuBar) {
+    JMenu menu = new JMenu("学生管理");
+    JMenuItem plusMenu = new JMenuItem("添加学生");
+    JMenuItem minusMenu = new JMenuItem("删除选定学生");
+    JMenuItem refreshMenu = new JMenuItem("刷新表格");
+
+    plusMenu.addActionListener(this::createRow);
+    minusMenu.addActionListener(this::removeRow);
+    refreshMenu.addActionListener(this::requestRefresh);
+    menu.add(plusMenu);
+    menu.add(minusMenu);
+    menu.add(refreshMenu);
+    menuBar.add(menu);
+  }
+
   private void createRow(ActionEvent actionEvent) {
     CreateStudentDialog dialog = new CreateStudentDialog();
     dialog.setModal(true);
@@ -64,7 +79,6 @@ public class StudentManagementPanel extends JPanel {
   private void createSelf() {
     table = new JTable();
     setTableRender();
-    // table.setDefaultRenderer(Object.class, new MyDefaultTableCellRenderer());
 
     searchBox = new JTextField(8);
     searchBox.setMaximumSize(searchBox.getPreferredSize());
