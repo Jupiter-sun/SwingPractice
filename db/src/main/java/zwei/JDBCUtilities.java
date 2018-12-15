@@ -2,7 +2,7 @@ package zwei;
 
 import org.intellij.lang.annotations.Language;
 
-import javax.sql.rowset.CachedRowSet;
+import javax.sql.rowset.FilteredRowSet;
 import javax.sql.rowset.RowSetProvider;
 import javax.swing.*;
 import java.io.*;
@@ -53,18 +53,19 @@ public final class JDBCUtilities {
   }
 
   /** 连接到数据库，以sql的结果创建RowSet对象 */
-  public CachedRowSet newCachedRowSet(@Language("sql") String sql) {
-    CachedRowSet crs;
+  public FilteredRowSet newRowSet(@Language("sql") String sql) {
+    FilteredRowSet frs;
     try {
-      crs = RowSetProvider.newFactory().createCachedRowSet();
-      crs.setType(ResultSet.TYPE_SCROLL_INSENSITIVE);
-      crs.setConcurrency(ResultSet.CONCUR_UPDATABLE);
-      crs.setCommand(sql);
+      frs = RowSetProvider.newFactory().createFilteredRowSet();
+      frs.setType(ResultSet.TYPE_SCROLL_INSENSITIVE);
+      frs.setConcurrency(ResultSet.CONCUR_UPDATABLE);
+      frs.setCommand(sql);
+      frs.execute(connection);
     } catch (SQLException e) {
       printSQLException(e);
       throw new RuntimeException(e);
     }
-    return crs;
+    return frs;
   }
 
   /** @throws NullPointerException cannot get connection */

@@ -61,6 +61,7 @@ public class StudentManagementPanel extends JPanel {
     Student student = dialog.getUserInput();
     if (student != null) {
       model.createRow(student);
+
     }
   }
 
@@ -115,6 +116,7 @@ public class StudentManagementPanel extends JPanel {
 
   private void fireNameFilter() {
     String searchFor = searchBox.getText();
+    System.out.println("Filter name: " + searchFor);
     model.narrowDown(searchFor);
   }
 

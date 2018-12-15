@@ -23,7 +23,7 @@ create table course (
 
   primary key (id),
   unique (teacher, name),
-  foreign key (teacher) references teacher (id)
+  foreign key (teacher) references teacher (id) on delete cascade
 );
 
 create table course_student (
@@ -32,6 +32,6 @@ create table course_student (
   score   decimal(5, 2),
 
   primary key (student, course),
-  foreign key (student) references student (id),
-  foreign key (course) references course (id)
+  foreign key (student) references student (id) on delete cascade,
+  foreign key (course) references course (id) on delete cascade
 );
