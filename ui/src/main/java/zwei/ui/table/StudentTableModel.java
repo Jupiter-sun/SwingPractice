@@ -25,8 +25,8 @@ public class StudentTableModel extends AbstractTableModel {
 
   private static final long serialVersionUID = -2667246886106680138L;
   private transient FilteredRowSet rowSet;
+  private transient MyPredicate filter;
   private String[] columnNames = {"学号", "姓名", "班级", "专业"};
-  private MyPredicate filter;
 
   public StudentTableModel() {
     filter = new MyPredicate();
@@ -96,13 +96,16 @@ public class StudentTableModel extends AbstractTableModel {
 
   @Override
   public int getRowCount() {
+    int count = 0;
     try {
-      rowSet.last();
-      return rowSet.getRow();
+      rowSet.beforeFirst();
+      while (rowSet.next()) {
+        count++;
+      }
     } catch (SQLException e) {
       JDBCUtilities.printSQLException(e);
     }
-    return 0;
+    return count;
   }
 
   @Override
@@ -184,12 +187,12 @@ public class StudentTableModel extends AbstractTableModel {
     }
 
     @Override
-    public boolean evaluate(Object value, int column) throws SQLException {
+    public boolean evaluate(Object value, int column) {
       return true;
     }
 
     @Override
-    public boolean evaluate(Object value, String columnName) throws SQLException {
+    public boolean evaluate(Object value, String columnName) {
       return true;
     }
   }

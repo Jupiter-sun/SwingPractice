@@ -33,21 +33,7 @@ public class StudentManagementPanel extends JPanel {
     model = new StudentTableModel();
     table.setModel(model);
 
-    searchBox.getDocument().addDocumentListener(new DocumentListener() {
-      @Override
-      public void insertUpdate(DocumentEvent e) {
-        fireNameFilter();
-      }
-
-      @Override
-      public void removeUpdate(DocumentEvent e) {
-        fireNameFilter();
-      }
-
-      @Override
-      public void changedUpdate(DocumentEvent e) { }
-    });
-
+    searchBox.getDocument().addDocumentListener(new MyDocumentListener());
     plusBtn.addActionListener(this::createRow);
     minusBtn.addActionListener(this::removeRow);
     refreshBtn.addActionListener(this::requestRefresh);
@@ -61,7 +47,6 @@ public class StudentManagementPanel extends JPanel {
     Student student = dialog.getUserInput();
     if (student != null) {
       model.createRow(student);
-
     }
   }
 
@@ -114,12 +99,6 @@ public class StudentManagementPanel extends JPanel {
     add(controlPanel);
   }
 
-  private void fireNameFilter() {
-    String searchFor = searchBox.getText();
-    System.out.println("Filter name: " + searchFor);
-    model.narrowDown(searchFor);
-  }
-
   private void setTableRender() {
     TableCellRenderer renderer = table.getDefaultRenderer(Object.class);
     table.setDefaultRenderer(Object.class, (table1, value, isSelected, hasFocus, row, column) -> {
@@ -130,6 +109,28 @@ public class StudentManagementPanel extends JPanel {
       c.setForeground(isSelected ? Color.BLACK : new Color(0x222426));
       return c;
     });
+  }
+
+  private class MyDocumentListener implements DocumentListener {
+
+    private void fireNameFilter() {
+      String searchFor = searchBox.getText();
+      System.out.println("Filter name: " + searchFor);
+      model.narrowDown(searchFor);
+    }
+
+    @Override
+    public void insertUpdate(DocumentEvent e) {
+      fireNameFilter();
+    }
+
+    @Override
+    public void removeUpdate(DocumentEvent e) {
+      fireNameFilter();
+    }
+
+    @Override
+    public void changedUpdate(DocumentEvent e) { }
   }
 }
 
