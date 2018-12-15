@@ -2,7 +2,7 @@ package zwei.ui.mediator;
 
 import zwei.model.CourseStudentLink;
 import zwei.model.Student;
-import zwei.ui.table.CourseListModel;
+import zwei.ui.table.StudentCourseListModel;
 
 import javax.swing.*;
 import javax.swing.border.Border;
@@ -20,8 +20,6 @@ public class StudentInterface extends JPanel implements UserInterface {
 
   private static final long serialVersionUID = -3427522772908306608L;
 
-  private Student student;
-
   private JLabel idLabel;
   private JLabel nmLabel;
   private JLabel clLabel;
@@ -30,7 +28,7 @@ public class StudentInterface extends JPanel implements UserInterface {
   private JComboBox<String> courseDropdown;
   private JButton searchBtn;
   private JTextField scoreArea;
-  private CourseListModel courseListModel;
+  private StudentCourseListModel courseListModel;
 
   public StudentInterface() {
     createSelf();
@@ -121,13 +119,13 @@ public class StudentInterface extends JPanel implements UserInterface {
     add(rightPanel, BorderLayout.CENTER);
   }
 
-  private void fillInData() {
+  private void fillInData(Student student) {
     idLabel.setText(student.getStudentId());
     nmLabel.setText(student.getStudentName());
     clLabel.setText(student.getStudentGrade());
     sjLabel.setText(student.getStudentSubject());
 
-    courseListModel = new CourseListModel(student);
+    courseListModel = new StudentCourseListModel(student);
     courseDropdown.setModel(courseListModel);
     searchBtn.addActionListener(this::fireSearch);
   }
@@ -152,7 +150,6 @@ public class StudentInterface extends JPanel implements UserInterface {
 
   @Override
   public void showInFrame(JFrame parent) {
-    fillInData();
     parent.setContentPane(this);
     parent.setTitle("学生页面");
     parent.pack();
@@ -163,7 +160,8 @@ public class StudentInterface extends JPanel implements UserInterface {
   @Override
   public void putArgument(String key, Object value) {
     if ("user".equals(key)) {
-      student = (Student) value;
+      Student student = (Student) value;
+      fillInData(student);
     }
   }
 

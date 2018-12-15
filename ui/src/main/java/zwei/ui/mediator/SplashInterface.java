@@ -29,6 +29,7 @@ public class SplashInterface extends JPanel implements UserInterface {
 
   public SplashInterface() {
     createSelf();
+
     idField.addActionListener(this::enterOnIdField);
     pwField.addActionListener(this::clickLogin);
     loginBtn.addActionListener(this::clickLogin);

@@ -1,6 +1,7 @@
 package zwei.ui.mediator;
 
 import zwei.model.Student;
+import zwei.model.Teacher;
 import zwei.ui.table.StudentTableModel;
 
 import javax.swing.*;
@@ -37,6 +38,9 @@ public class StudentManagementPanel extends JPanel {
     plusBtn.addActionListener(this::createRow);
     minusBtn.addActionListener(this::removeRow);
     refreshBtn.addActionListener(this::requestRefresh);
+  }
+
+  public void setUser(Teacher teacher) {
   }
 
   public void setMenubar(JMenuBar menuBar) {

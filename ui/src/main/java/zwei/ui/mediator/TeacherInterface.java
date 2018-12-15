@@ -14,9 +14,6 @@ public class TeacherInterface extends JPanel implements UserInterface {
 
   private static final long serialVersionUID = -2882649301771472643L;
 
-  private Teacher teacher;
-
-  private JTabbedPane switcher;
   private StudentManagementPanel studentPanel;
   private ScoreManagementPanel scorePanel;
   private JMenuBar menuBar;
@@ -35,7 +32,7 @@ public class TeacherInterface extends JPanel implements UserInterface {
     studentPanel.setMenubar(menuBar);
     scorePanel.setMenubar(menuBar);
 
-    switcher = new JTabbedPane(SwingConstants.TOP);
+    JTabbedPane switcher = new JTabbedPane(SwingConstants.TOP);
     switcher.addTab("学生信息", studentPanel);
     switcher.addTab("成绩信息", scorePanel);
 
@@ -57,7 +54,9 @@ public class TeacherInterface extends JPanel implements UserInterface {
   @Override
   public void putArgument(String key, Object value) {
     if ("user".equals(key)) {
-      teacher = (Teacher) value;
+      Teacher teacher = (Teacher) value;
+      studentPanel.setUser(teacher);
+      scorePanel.setUser(teacher);
     }
   }
 

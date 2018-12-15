@@ -1,7 +1,9 @@
 package zwei;
 
 import org.intellij.lang.annotations.Language;
+import org.jetbrains.annotations.Nullable;
 
+import javax.sql.RowSet;
 import javax.sql.rowset.FilteredRowSet;
 import javax.sql.rowset.RowSetProvider;
 import javax.swing.*;
@@ -54,12 +56,19 @@ public final class JDBCUtilities {
 
   /** 连接到数据库，以sql的结果创建RowSet对象 */
   public FilteredRowSet newRowSet(@Language("sql") String sql) {
+    return newRowSet(sql, null);
+  }
+
+  /** 连接到数据库，以sql的结果创建RowSet对象 */
+  public FilteredRowSet newRowSet(@Language("sql") String sql,
+      @Nullable StatementPromoter<RowSet> addOn) {
     FilteredRowSet frs;
     try {
       frs = RowSetProvider.newFactory().createFilteredRowSet();
       frs.setType(ResultSet.TYPE_SCROLL_INSENSITIVE);
       frs.setConcurrency(ResultSet.CONCUR_UPDATABLE);
       frs.setCommand(sql);
+      if (addOn != null) addOn.accept(frs);
       frs.execute(connection);
     } catch (SQLException e) {
       printSQLException(e);
@@ -257,5 +266,11 @@ public final class JDBCUtilities {
     if (sqlState.equalsIgnoreCase("42Y55")) { return true; }
 
     return false;
+  }
+
+  @FunctionalInterface
+  public interface StatementPromoter<T> {
+
+    void accept(T statement) throws SQLException;
   }
 }

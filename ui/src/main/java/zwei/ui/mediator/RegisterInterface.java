@@ -13,6 +13,7 @@ import java.awt.event.ActionEvent;
 public class RegisterInterface extends JPanel implements UserInterface {
 
   private static final long serialVersionUID = -5795654569586694048L;
+
   private Class<? extends User> type;
 
   private JTextField idField;

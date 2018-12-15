@@ -12,6 +12,7 @@ import java.util.List;
 public class Teacher extends User {
 
   private static final long serialVersionUID = -5053780242741971192L;
+
   @NotNull private String name;
 
   public void persist(Connection conn) {

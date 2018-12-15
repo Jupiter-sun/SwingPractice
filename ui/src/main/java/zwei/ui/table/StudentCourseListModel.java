@@ -13,14 +13,14 @@ import java.util.List;
  *
  * @author 九条涼果 chunxiang.huang@hypers.com
  */
-public class CourseListModel extends AbstractListModel<String>
+public class StudentCourseListModel extends AbstractListModel<String>
     implements ComboBoxModel<String> {
 
   private static final long serialVersionUID = -4783417329489491964L;
   @Nullable private CourseStudentLink selected;
   private List<CourseStudentLink> scores;
 
-  public CourseListModel(Student student) {
+  public StudentCourseListModel(Student student) {
     this.scores = CourseStudentLink.getScore(student);
     selected = scores.isEmpty() ? null : scores.get(0);
   }
