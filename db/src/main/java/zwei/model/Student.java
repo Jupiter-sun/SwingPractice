@@ -11,6 +11,8 @@ import java.util.List;
 
 public class Student extends User {
 
+  private static final long serialVersionUID = 5911518347954195350L;
+
   @NotNull private String name;
   @NotNull private String className;
   @NotNull private String majorName;
@@ -23,6 +25,13 @@ public class Student extends User {
     return student;
   }
 
+  public void updateInsertRow(ResultSet rowSet) throws SQLException {
+    rowSet.updateString("id", uid);
+    rowSet.updateString("password", password);
+    rowSet.updateString("name", name);
+    rowSet.updateString("class_name", className);
+    rowSet.updateString("major_name", majorName);
+  }
 
   public void persist(Connection conn) {
     persistOne(conn, this);
@@ -40,6 +49,17 @@ public class Student extends User {
     created.name = name;
     created.uid = id;
     created.setPassword(password);
+    return created;
+  }
+
+  public static Student createAccount(@NotNull String id, @NotNull String name,
+      @NotNull String password, @NotNull String className, @NotNull String majorName) {
+    Student created = new Student();
+    created.name = name;
+    created.uid = id;
+    created.setPassword(password);
+    created.className = className;
+    created.majorName = majorName;
     return created;
   }
 

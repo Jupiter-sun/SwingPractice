@@ -13,6 +13,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.*;
+import java.util.Collection;
+import java.util.LinkedList;
 import java.util.Properties;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -218,8 +220,12 @@ public final class JDBCUtilities {
   public static void printSQLException(SQLException ex) {
     SwingUtilities.invokeLater(() -> JOptionPane.showMessageDialog(null,
         ex.getMessage(), "SQL错误", JOptionPane.ERROR_MESSAGE));
+    Collection<Throwable> processed = new LinkedList<>();
     for (Throwable e : ex) {
+      if (processed.contains(e)) continue;
+
       e.printStackTrace();
+      processed.add(e);
 
       if (e instanceof SQLException) {
         if (ignoreSQLException(((SQLException) e).getSQLState())) {
@@ -231,6 +237,7 @@ public final class JDBCUtilities {
       System.err.println("Message: " + e.getMessage());
       Throwable t = ex.getCause();
       while (t != null) {
+        processed.add(t);
         System.err.println("Cause: " + t);
         t = t.getCause();
       }

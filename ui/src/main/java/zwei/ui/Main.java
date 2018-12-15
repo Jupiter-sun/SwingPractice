@@ -19,7 +19,7 @@ public final class Main {
     try {
       JDBCUtilities.getInstance(propertyFile);
     } catch (Exception e) {
-      System.out.println("Problem reading properties file " + propertyFile);
+      System.err.println("Problem reading properties file " + propertyFile);
       return;
     }
 

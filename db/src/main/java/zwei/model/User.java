@@ -23,7 +23,6 @@ public abstract class User implements Serializable {
     return uid;
   }
 
-
   protected void setPassword(@NotNull String password) {
     this.password = hashString(password);
   }

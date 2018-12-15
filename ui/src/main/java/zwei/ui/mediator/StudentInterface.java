@@ -29,7 +29,7 @@ public class StudentInterface extends JPanel implements UserInterface {
 
   private JComboBox<String> courseDropdown;
   private JButton searchBtn;
-  private JTextArea scoreArea;
+  private JTextField scoreArea;
   private CourseListModel courseListModel;
 
   public StudentInterface() {
@@ -53,21 +53,26 @@ public class StudentInterface extends JPanel implements UserInterface {
     sjLabelLabel.setLabelFor(sjLabel);
 
     JPanel leftPanel = new JPanel();
-    leftPanel.setLayout(new BoxLayout(leftPanel, BoxLayout.PAGE_AXIS));
+    leftPanel.setLayout(new BoxLayout(leftPanel, BoxLayout.Y_AXIS));
     leftPanel.setBorder(BorderFactory.createTitledBorder("简介"));
 
+    Border padding         = BorderFactory.createEmptyBorder(4, 4, 4, 4);
     JPanel leftSubSegment1 = new JPanel(new BorderLayout(4, 0));
     JPanel leftSubSegment2 = new JPanel(new BorderLayout(4, 0));
     JPanel leftSubSegment3 = new JPanel(new BorderLayout(4, 0));
     JPanel leftSubSegment4 = new JPanel(new BorderLayout(4, 0));
     leftSubSegment1.add(idLabelLabel, BorderLayout.LINE_START);
     leftSubSegment1.add(idLabel, BorderLayout.CENTER);
+    leftSubSegment1.setBorder(padding);
     leftSubSegment2.add(nmLabelLabel, BorderLayout.LINE_START);
     leftSubSegment2.add(nmLabel, BorderLayout.CENTER);
+    leftSubSegment2.setBorder(padding);
     leftSubSegment3.add(clLabelLabel, BorderLayout.LINE_START);
     leftSubSegment3.add(clLabel, BorderLayout.CENTER);
+    leftSubSegment3.setBorder(padding);
     leftSubSegment4.add(sjLabelLabel, BorderLayout.LINE_START);
     leftSubSegment4.add(sjLabel, BorderLayout.CENTER);
+    leftSubSegment4.setBorder(padding);
     leftPanel.add(leftSubSegment1);
     leftPanel.add(leftSubSegment2);
     leftPanel.add(leftSubSegment3);
@@ -81,11 +86,14 @@ public class StudentInterface extends JPanel implements UserInterface {
     searchBtn = new JButton("查询");
     searchBtn.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-    scoreArea = new JTextArea();
+    scoreArea = new JTextField();
     Border       lineBorder   = BorderFactory.createLineBorder(Color.DARK_GRAY);
     TitledBorder titledBorder = BorderFactory.createTitledBorder(lineBorder, "分数");
     scoreArea.setBorder(titledBorder);
+    scoreArea.setEditable(false);
     scoreArea.setOpaque(false);
+    scoreArea.setHorizontalAlignment(JTextField.CENTER);
+    scoreArea.setFont(new Font("Default", Font.PLAIN, 24));
 
     JPanel rightSubSegment1 = new JPanel(new BorderLayout(4, 0));
     rightSubSegment1.add(dropDownLabel, BorderLayout.WEST);
@@ -93,7 +101,6 @@ public class StudentInterface extends JPanel implements UserInterface {
 
     JPanel rightPanel = new JPanel();
     rightPanel.setLayout(new GridBagLayout());
-
     GridBagConstraints constraints = new GridBagConstraints();
     constraints.fill = GridBagConstraints.HORIZONTAL;
     constraints.weighty = 0;
@@ -125,11 +132,22 @@ public class StudentInterface extends JPanel implements UserInterface {
     searchBtn.addActionListener(this::fireSearch);
   }
 
+  @SuppressWarnings("MagicNumber")
   private void fireSearch(ActionEvent actionEvent) {
     CourseStudentLink item   = courseListModel.getSelected();
     BigDecimal        score  = item.getScore();
-    String            course = item.getCourse().getName();
-    scoreArea.append(String.format("%s: %s%n", course, score));
+
+    String scoreText = score.stripTrailingZeros().toPlainString();
+    scoreArea.setText(String.format("%s分", scoreText));
+    TitledBorder border = (TitledBorder) scoreArea.getBorder();
+    if (score.compareTo(BigDecimal.valueOf(60)) < 0) {
+      border.setBorder(BorderFactory.createLineBorder(new Color(0x6C200C)));
+    } else if (score.compareTo(BigDecimal.valueOf(80)) < 0) {
+      border.setBorder(BorderFactory.createLineBorder(new Color(0x6C5821)));
+    } else {
+      border.setBorder(BorderFactory.createLineBorder(new Color(0x426C21)));
+    }
+    scoreArea.setBorder(border);
   }
 
   @Override
@@ -146,21 +164,6 @@ public class StudentInterface extends JPanel implements UserInterface {
   public void putArgument(String key, Object value) {
     if ("user".equals(key)) {
       student = (Student) value;
-    }
-  }
-
-  private static class MyDefaultListCellRenderer extends DefaultListCellRenderer {
-
-    private static final long serialVersionUID = -4861762253451239217L;
-
-    @Override
-    public Component getListCellRendererComponent(JList<?> list, Object value, int index,
-        boolean isSelected, boolean cellHasFocus) {
-      super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
-      if (value instanceof CourseStudentLink) {
-        setText(((CourseStudentLink) value).getCourse().getName());
-      }
-      return this;
     }
   }
 

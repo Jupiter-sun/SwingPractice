@@ -35,6 +35,7 @@ public class CourseListModel extends AbstractListModel<String>
   @Nullable
   @Override
   public String getSelectedItem() {
+    if (selected == null) return "——";
     return selected.getCourse().getName();
   }
 

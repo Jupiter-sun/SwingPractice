@@ -2,6 +2,8 @@ package zwei.ui.mediator;
 
 import zwei.JDBCUtilities;
 import zwei.model.Student;
+import zwei.model.Teacher;
+import zwei.model.User;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -11,6 +13,7 @@ import java.awt.event.ActionEvent;
 public class RegisterInterface extends JPanel implements UserInterface {
 
   private static final long serialVersionUID = -5795654569586694048L;
+  private Class<? extends User> type;
 
   private JTextField idField;
   private JTextField pwField;
@@ -21,8 +24,16 @@ public class RegisterInterface extends JPanel implements UserInterface {
 
   private Memento parentState;
 
-  public RegisterInterface() {
+  public RegisterInterface(Class<? extends User> type) {
+    this.type = type;
+
     createSelf();
+    idField.addActionListener((e) -> idField.transferFocus());
+    nmField.addActionListener((e) -> nmField.transferFocus());
+    pwField.addActionListener(this::clickRegister);
+
+    backBtn.addActionListener(this::backward);
+    registerBtn.addActionListener(this::clickRegister);
   }
 
   @Override
@@ -47,14 +58,9 @@ public class RegisterInterface extends JPanel implements UserInterface {
     idLabel.setLabelFor(idField);
     nmLabel.setLabelFor(nmField);
     pwLabel.setLabelFor(pwField);
-    idField.addActionListener((e) -> idField.transferFocus());
-    nmField.addActionListener((e) -> nmField.transferFocus());
-    pwField.addActionListener(this::clickRegister);
 
     backBtn = new JButton("返回");
-    backBtn.addActionListener(this::backward);
     registerBtn = new JButton("注册");
-    registerBtn.addActionListener(this::clickRegister);
 
     JPanel midPanel = new JPanel(new SpringLayout());
     midPanel.add(idLabel);
@@ -80,8 +86,16 @@ public class RegisterInterface extends JPanel implements UserInterface {
     String inputName     = nmField.getText();
     String inputPassword = pwField.getText();
 
-    Student newlyCreated = Student.createAccount(inputId, inputName, inputPassword);
-    boolean success = JDBCUtilities.dbop((conn) -> {return Student.persistOne(conn, newlyCreated);});
+    boolean success = false;
+    //noinspection ChainOfInstanceofChecks
+    if (type == Student.class) {
+      Student newlyCreated = Student.createAccount(inputId, inputName, inputPassword);
+      success = JDBCUtilities.dbop((conn) -> {return Student.persistOne(conn, newlyCreated);});
+    } else if (type == Teacher.class) {
+      Teacher newlyCreated = Teacher.createAccount(inputId, inputName, inputPassword);
+      success = JDBCUtilities.dbop((conn) -> {return Teacher.persistOne(conn, newlyCreated);});
+    }
+
     if (success) {
       backward(actionEvent); // return to previous page
     } else {

@@ -29,6 +29,10 @@ public class SplashInterface extends JPanel implements UserInterface {
 
   public SplashInterface() {
     createSelf();
+    idField.addActionListener(this::enterOnIdField);
+    pwField.addActionListener(this::clickLogin);
+    loginBtn.addActionListener(this::clickLogin);
+    registerBtn.addActionListener(this::clickRegister);
   }
 
   @Override
@@ -44,26 +48,23 @@ public class SplashInterface extends JPanel implements UserInterface {
 
   @SuppressWarnings("Duplicates")
   private void createSelf() {
-    idField = new JTextField("1000");
+    idField = new JTextField("001");
     pwField = new JPasswordField("111");
     JLabel idLabel = new JLabel(" ID:", JLabel.TRAILING);
     JLabel pwLabel = new JLabel("PWD:", JLabel.TRAILING);
     idLabel.setLabelFor(idField);
     pwLabel.setLabelFor(pwField);
-    idField.addActionListener((e) -> idField.transferFocus());
-    pwField.addActionListener(this::clickLogin);
+
 
     loginBtn = new JButton("登录");
-    loginBtn.addActionListener(this::clickLogin);
     registerBtn = new JButton("注册");
-    registerBtn.addActionListener(this::clickRegister);
 
     stuRadioBtn = new JRadioButton("学生");
     teaRadioBtn = new JRadioButton("教师");
     ButtonGroup buttonGroup = new ButtonGroup();
     buttonGroup.add(teaRadioBtn);
     buttonGroup.add(stuRadioBtn);
-    stuRadioBtn.setSelected(true);
+    teaRadioBtn.setSelected(true);
 
     JPanel topPanel = new JPanel();
     topPanel.add(stuRadioBtn);
@@ -86,6 +87,15 @@ public class SplashInterface extends JPanel implements UserInterface {
     add(topPanel);
     add(midPanel);
     add(lstPanel);
+  }
+
+  /** @see #idField */
+  private void enterOnIdField(ActionEvent actionEvent) {
+    if (pwField.getText().isEmpty()) {
+      pwField.transferFocus();
+    } else {
+      clickLogin(actionEvent);
+    }
   }
 
   /** @see #loginBtn */
@@ -131,7 +141,17 @@ public class SplashInterface extends JPanel implements UserInterface {
 
   /** @see #registerBtn */
   private void clickRegister(ActionEvent actionEvent) {
-    switchPanel(new RegisterInterface());
+    Class<? extends User> type;
+    if (stuRadioBtn.isSelected()) {
+      type = Student.class;
+    } else if (teaRadioBtn.isSelected()) {
+      type = Teacher.class;
+    } else {
+      JOptionPane.showMessageDialog(this, "单选框未选中", "异常发生", JOptionPane.WARNING_MESSAGE);
+      return;
+    }
+
+    switchPanel(new RegisterInterface(type));
   }
 
   /**

@@ -1,6 +1,5 @@
 package zwei.model;
 
-import org.intellij.lang.annotations.Language;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import zwei.JDBCUtilities;
@@ -12,6 +11,7 @@ import java.util.List;
 
 public class Teacher extends User {
 
+  private static final long serialVersionUID = -5053780242741971192L;
   @NotNull private String name;
 
   public void persist(Connection conn) {
@@ -23,6 +23,15 @@ public class Teacher extends User {
   }
 
   /* Static Methods */
+
+  public static Teacher createAccount(@NotNull String id, @NotNull String name,
+      @NotNull String password) {
+    Teacher created = new Teacher();
+    created.name = name;
+    created.uid = id;
+    created.setPassword(password);
+    return created;
+  }
 
   @NotNull
   public static List<Teacher> retrieveALl(Connection conn) {
@@ -37,10 +46,15 @@ public class Teacher extends User {
     return Collections.emptyList();
   }
 
+  /**
+   * 通过id获取一个Teacher
+   */
   @SuppressWarnings("Duplicates")
   @Nullable
   public static Teacher retrieveOne(@NotNull Connection conn, String uid) {
-    String sql = "select * from teacher where id=?1";
+    if (uid == null) return null;
+
+    String sql = "select * from teacher where id=?";
     try (PreparedStatement statement = conn.prepareStatement(sql)) {
       statement.setString(1, uid);
       List<Teacher> list = parseResultSet(statement.executeQuery());
@@ -51,21 +65,26 @@ public class Teacher extends User {
     return null;
   }
 
-  public static void persistOne(Connection conn, Teacher stu) {
-    String sql = "insert into teacher (id, password, name) values (?1, ?2, ?3)";
-    populateStatement(conn, stu, sql);
-  }
-
-  public static void updateOne(Connection conn, Teacher stu) {
-    String sql = "update student set password=?2, name=?3, class_id=?4, subject=?5 where id = ?1";
-    populateStatement(conn, stu, sql);
-  }
-
-  private static void populateStatement(Connection conn, Teacher stu, @Language("sql") String sql) {
+  public static boolean persistOne(Connection conn, Teacher stu) {
+    String sql = "insert into teacher (id, password, name) values (?, ?, ?)";
     try (PreparedStatement statement = conn.prepareStatement(sql)) {
       statement.setString(1, stu.uid);
       statement.setString(2, stu.password);
       statement.setString(3, stu.name);
+      statement.executeUpdate();
+      return true;
+    } catch (SQLException e) {
+      JDBCUtilities.printSQLException(e);
+    }
+    return false;
+  }
+
+  public static void updateOne(Connection conn, Teacher stu) {
+    String sql = "update student set password=?, name=? where id=?";
+    try (PreparedStatement statement = conn.prepareStatement(sql)) {
+      statement.setString(1, stu.password);
+      statement.setString(2, stu.name);
+      statement.setString(3, stu.uid);
       statement.executeUpdate();
     } catch (SQLException e) {
       JDBCUtilities.printSQLException(e);
@@ -73,13 +92,13 @@ public class Teacher extends User {
   }
 
   @NotNull
-  static List<Teacher> parseResultSet(ResultSet resultSet) {
+  private static List<Teacher> parseResultSet(ResultSet resultSet) {
     List<Teacher> students = new LinkedList<>();
     try {
       while (resultSet.next()) {
         // @formatter:off
         Teacher s   = new Teacher();
-        s.uid       = resultSet.getString("uid");
+        s.uid       = resultSet.getString("id");
         s.password  = resultSet.getString("password");
         s.name      = resultSet.getString("name");
         // @formatter:on
