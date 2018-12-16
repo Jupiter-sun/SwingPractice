@@ -8,8 +8,6 @@ import javax.sql.rowset.FilteredRowSet;
 import javax.sql.rowset.RowSetProvider;
 import javax.swing.*;
 import java.io.*;
-import java.net.URISyntaxException;
-import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -188,19 +186,13 @@ public final class JDBCUtilities {
 
   /** @throws RuntimeException reading failed */
   private void setProperties(String fileName) {
+    Path       path = Paths.get(fileName);
     Properties prop = new Properties();
-
-    Path path = Paths.get(fileName);
-    if (!Files.exists(path)) {
-      try {
-        URL resource = getClass().getClassLoader().getResource(fileName);
-        if (resource != null) {
-          path = Paths.get(resource.toURI());
-        }
-      } catch (URISyntaxException ignored) {}
-    }
-    try (InputStream fis = Files.newInputStream(path)) {
-      prop.load(fis);
+    try (
+        InputStream is = Files.exists(path) ?
+            Files.newInputStream(path) :
+            ClassLoader.getSystemResourceAsStream(fileName)) {
+      prop.load(is);
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
@@ -208,11 +200,6 @@ public final class JDBCUtilities {
     this.dbUrl = prop.getProperty("db.url");
     this.username = prop.getProperty("db.username");
     this.password = prop.getProperty("db.password");
-    //
-    // System.out.println("Set the following properties:");
-    // System.out.println("url string: " + dbUrl);
-    // System.out.println("username: " + username);
-    // System.out.println("password: " + password);
   }
 
   /** Database operation */

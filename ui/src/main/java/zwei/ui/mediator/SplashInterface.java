@@ -64,7 +64,7 @@ public class SplashInterface extends JPanel implements UserInterface {
     ButtonGroup buttonGroup = new ButtonGroup();
     buttonGroup.add(teaRadioBtn);
     buttonGroup.add(stuRadioBtn);
-    teaRadioBtn.setSelected(true);
+    stuRadioBtn.setSelected(true);
 
     JPanel topPanel = new JPanel();
     topPanel.add(stuRadioBtn);
