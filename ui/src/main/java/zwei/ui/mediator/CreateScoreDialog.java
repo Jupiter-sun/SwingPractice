@@ -1,12 +1,16 @@
 package zwei.ui.mediator;
 
 import org.jetbrains.annotations.Nullable;
+import zwei.JDBCUtilities;
+import zwei.model.Course;
 import zwei.model.Student;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.math.BigDecimal;
+import java.sql.Connection;
+import java.util.List;
 
 /**
  * Created on 2018-12-14
@@ -26,10 +30,15 @@ public class CreateScoreDialog extends JDialog {
   private transient Student userInputStudent;
   private transient BigDecimal userInputScore;
 
-  public CreateScoreDialog() {
+  public CreateScoreDialog(@Nullable Course course) {
     createSelf();
+    Connection connection = JDBCUtilities.getInstance().getConnection();
+    List<Student> students = (course == null) ?
+        Student.retrieveALl(connection) :
+        course.nonLinkedStudents(JDBCUtilities.getInstance().getConnection());
+    studentBox.setModel(new DefaultComboBoxModel<>(students.toArray(new Student[0])));
 
-    studentBox.addItemListener(e -> scoreField.transferFocus());
+    studentBox.addItemListener(e -> studentBox.transferFocus());
     scoreField.addActionListener(this::clickOk);
     confirmBtn.addActionListener(this::clickOk);
     cancelBtn.addActionListener(this::clickCancel);
@@ -39,16 +48,19 @@ public class CreateScoreDialog extends JDialog {
     Object item      = studentBox.getSelectedItem();
     String scoreText = scoreField.getText();
     if (item == null) {
-      studentBox.transferFocus();
+      studentBox.requestFocusInWindow();
     } else if (scoreText.isEmpty()) {
-      scoreField.transferFocus();
+      scoreField.requestFocusInWindow();
     } else {
       try {
         userInputStudent = (Student) item;
         userInputScore = new BigDecimal(scoreText);
+        if (userInputScore.compareTo(BigDecimal.ZERO) < 0) {
+          throw new NumberFormatException();
+        }
         dispose();
       } catch (NumberFormatException e) {
-        scoreField.transferFocus();
+        scoreField.requestFocusInWindow();
       }
     }
   }
@@ -63,6 +75,7 @@ public class CreateScoreDialog extends JDialog {
 
     JLabel selectLabel = new JLabel("学生:");
     studentBox = new JComboBox<>();
+    UiHelper.setListRender(studentBox, Student::getStudentName);
     selectLabel.setLabelFor(studentBox);
 
     JLabel scoreLabel = new JLabel("成绩:");
@@ -128,7 +141,7 @@ public class CreateScoreDialog extends JDialog {
   }
 
   public static void main(String[] args) {
-    Window dialog = new CreateScoreDialog();
+    Window dialog = new CreateScoreDialog(null);
     dialog.pack();
     dialog.setVisible(true);
     dialog.setLocationRelativeTo(null);

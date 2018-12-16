@@ -32,24 +32,32 @@ public class TeacherScoreTableModel extends AbstractTableModel {
 
   public void setCourse(Course selectedValue) {
     course = selectedValue;
-    refreshTable();
+    rowSet = JDBCUtilities.getInstance().newRowSet(
+        "select id, name, class_name, major_name, score from course_student l join student s on s.id = l.student where l.course = ?",
+        statement -> statement.setLong(1, course.getId()));
+    System.out.println("Refresh score table");
+    fireTableDataChanged();
   }
 
   /** 创建新的行，使用用户输入的数据创建学生账号 */
-  @SuppressWarnings("Duplicates")
   public void createRow(@NotNull Student student, BigDecimal score) {
     CourseStudentLink link = CourseStudentLink.createOne(student, course, score);
     try {
-      try {
-        rowSet.moveToInsertRow();
-        int rowNum = rowSet.getRow();
-        link.updateInsertRow(rowSet);
-        rowSet.insertRow();
-        rowSet.moveToCurrentRow();
-        rowSet.acceptChanges();
+      try (
+          PreparedStatement statement = JDBCUtilities.getInstance().createStatement(
+              "insert into course_student (student, course, score) values (?, ?, ?)")) {
+        // execute database update
+        link.updateStatement(statement);
+        statement.executeUpdate();
+
         System.out.println(MessageFormat.format(
-            "Assign score for student {0} on course {1} to {3} points",
+            "Assign score for student {0} on course {1} to {2} points",
             student.getStudentName(), course.getName(), score));
+
+        // update cached table model
+        rowSet.execute(JDBCUtilities.getInstance().getConnection());
+        // notify data change
+        int rowNum = rowSet.size() - 1;
         fireTableRowsInserted(rowNum, rowNum);
       } catch (SyncProviderException e) {
         refreshTable();
@@ -71,12 +79,19 @@ public class TeacherScoreTableModel extends AbstractTableModel {
     try {
       for (int row : selectedRows) {
         rowSet.absolute(row + 1); // row number start with one
-        String studentId = rowSet.getString("id"); // FIXME
-        rowSet.deleteRow();
-        rowSet.acceptChanges();
-        System.out.println("Delete student named " + studentId);
+        String studentId = rowSet.getString("id");
+        try (
+            PreparedStatement statement = JDBCUtilities.getInstance()
+                .createStatement("delete from course_student where student=? and course=?")) {
+          statement.setString(1, studentId);
+          statement.setLong(2, course.getId());
+          statement.executeUpdate();
+        }
+        System.out.println(
+            "Delete score for student named " + studentId + " on course " + course.getName());
         fireTableRowsDeleted(row, row);
       }
+      rowSet.execute(JDBCUtilities.getInstance().getConnection());
     } catch (SQLException e) {
       JDBCUtilities.printSQLException(e);
       refreshTable();
@@ -84,11 +99,14 @@ public class TeacherScoreTableModel extends AbstractTableModel {
   }
 
   public void refreshTable() {
+    // 用户没有选中左侧列表，会导致course为null
     if (course == null) return;
-    rowSet = JDBCUtilities.getInstance().newRowSet(
-        "select id, name, class_name, major_name, score from course_student l join student s on s.id = l.student where l.course = ?",
-        statement -> statement.setLong(1, course.getId()));
 
+    try {
+      rowSet.execute(JDBCUtilities.getInstance().getConnection());
+    } catch (SQLException e) {
+      JDBCUtilities.printSQLException(e);
+    }
     System.out.println("Refresh score table");
     fireTableDataChanged();
   }
@@ -102,6 +120,11 @@ public class TeacherScoreTableModel extends AbstractTableModel {
   @Override
   public int getColumnCount() {
     return columnNames.length;
+  }
+
+  @Override
+  public String getColumnName(int column) {
+    return columnNames[column];
   }
 
   @Override
@@ -152,6 +175,8 @@ public class TeacherScoreTableModel extends AbstractTableModel {
       System.out.println(MessageFormat.format(
           "Update score for student {0} in course {1} from {2} to {3}", studentName, courseName,
           originalValue, newValue));
+      rowSet.updateBigDecimal(columnIndex + 1, newValue);
+      fireTableCellUpdated(rowIndex, columnIndex);
     } catch (SQLException e) {
       JDBCUtilities.printSQLException(e);
       refreshTable();

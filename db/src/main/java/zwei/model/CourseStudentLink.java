@@ -27,6 +27,12 @@ public class CourseStudentLink implements Serializable {
     rowSet.updateBigDecimal("score", score);
   }
 
+  public void updateStatement(PreparedStatement statement) throws SQLException {
+    statement.setString(1, student.getId());
+    statement.setLong(2, course.getId());
+    statement.setBigDecimal(3, score);
+  }
+
   /* Static methods */
 
   public static CourseStudentLink createOne(Student student, Course course, BigDecimal score) {

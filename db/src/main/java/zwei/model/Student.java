@@ -127,7 +127,7 @@ public class Student extends User {
   }
 
   @NotNull
-  private static List<Student> parseResultSet(ResultSet resultSet) {
+  public static List<Student> parseResultSet(ResultSet resultSet) {
     List<Student> students = new LinkedList<>();
     try {
       while (resultSet.next()) {

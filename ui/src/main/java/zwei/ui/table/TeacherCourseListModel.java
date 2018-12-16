@@ -6,9 +6,8 @@ import zwei.model.Course;
 import zwei.model.Teacher;
 
 import javax.sql.rowset.CachedRowSet;
-import javax.sql.rowset.spi.SyncProviderException;
-import javax.sql.rowset.spi.SyncResolver;
 import javax.swing.*;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
 /**
@@ -32,27 +31,20 @@ public class TeacherCourseListModel extends AbstractListModel<Course> {
   @SuppressWarnings("Duplicates")
   public void createOne(Course course) {
     try {
-      try {
-        rowSet.moveToInsertRow();
-        int rowNum = rowSet.getRow();
-        course.updateInsertRow(rowSet);
-        rowSet.insertRow();
-        rowSet.moveToCurrentRow();
-        rowSet.acceptChanges();
+      try (
+          PreparedStatement statement = JDBCUtilities.getInstance()
+              .createStatement("insert into course (name, teacher)  values (?, ?)")) {
+        statement.setString(1, course.getName());
+        statement.setString(2, course.getTeacher().getId());
+        statement.executeUpdate();
         System.out.println("Save course named " + course.getName());
-        fireIntervalAdded(this, rowNum, rowNum);
-      } catch (SyncProviderException e) {
         refreshList();
-
-        SyncResolver resolver = e.getSyncResolver();
-        resolver.nextConflict();
-        if (resolver.getStatus() == SyncResolver.INSERT_ROW_CONFLICT) {
-          JOptionPane.showMessageDialog(null, "同名课程已存在", "保存失败", JOptionPane.ERROR_MESSAGE);
-        } else {
-          throw e;
-        }
       }
     } catch (SQLException e) {
+      if ("23505".equals(e.getSQLState())) {
+        JOptionPane.showMessageDialog(null, "同名课程已存在", "保存失败", JOptionPane.ERROR_MESSAGE);
+        return;
+      }
       JDBCUtilities.printSQLException(e);
     }
   }
@@ -64,6 +56,7 @@ public class TeacherCourseListModel extends AbstractListModel<Course> {
       rowSet.deleteRow();
       rowSet.acceptChanges();
       System.out.println("Delete course named " + name);
+      fireIntervalRemoved(this, index, index);
     } catch (SQLException e) {
       JDBCUtilities.printSQLException(e);
       refreshList();

@@ -40,13 +40,12 @@ public class RegisterInterface extends JPanel implements UserInterface {
   @Override
   public void showInFrame(JFrame parent) {
     parentState = backup(parent);
-    parent.setContentPane(this);
-    parent.getRootPane().setDefaultButton(registerBtn);
-    parent.setTitle("用户注册");
+    UiHelper.onFrameCenter(parent, f -> {
+      f.setContentPane(this);
+      f.getRootPane().setDefaultButton(registerBtn);
+      f.setTitle("用户注册");
+    });
   }
-
-  @Override
-  public void putArgument(String key, Object value) { }
 
   @SuppressWarnings("Duplicates")
   private void createSelf() {
@@ -100,7 +99,7 @@ public class RegisterInterface extends JPanel implements UserInterface {
     if (success) {
       backward(actionEvent); // return to previous page
     } else {
-      idField.transferFocus();
+      idField.requestFocusInWindow();
       idField.selectAll();
     }
   }

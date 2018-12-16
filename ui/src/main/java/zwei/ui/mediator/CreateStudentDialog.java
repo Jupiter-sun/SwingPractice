@@ -47,15 +47,15 @@ public class CreateStudentDialog extends JDialog {
     String mj = mjField.getText();
 
     if (id.isEmpty()) {
-      idField.transferFocus();
+      idField.requestFocusInWindow();
     } else if (pw.isEmpty()) {
-      pwField.transferFocus();
+      pwField.requestFocusInWindow();
     } else if (nm.isEmpty()) {
-      nmField.transferFocus();
+      nmField.requestFocusInWindow();
     } else if (cl.isEmpty()) {
-      clField.transferFocus();
+      clField.requestFocusInWindow();
     } else if (mj.isEmpty()) {
-      mjField.transferFocus();
+      mjField.requestFocusInWindow();
     } else {
       userInput = Student.createAccount(id, nm, pw, cl, mj);
       dispose();

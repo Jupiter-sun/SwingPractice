@@ -4,3 +4,5 @@ plugins {
 
 dependencies {
 }
+
+mainClassName = "zwei.ui.Main"

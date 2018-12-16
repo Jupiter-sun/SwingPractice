@@ -9,9 +9,15 @@ import java.awt.*;
  *
  * @author 九条涼果 chunxiang.huang@hypers.com
  */
+@FunctionalInterface
 public interface UserInterface {
 
-  void putArgument(String key, Object value);
+  /**
+   * Transfer arguments to panel.
+   * Inspired by Android Bundle mechanism
+   * Note: call after constructor, obviously
+   */
+  default void putArgument(String key, Object value) { }
 
   /** Note: call after {@link #putArgument(String, Object)}*/
   void showInFrame(JFrame parent);

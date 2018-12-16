@@ -36,21 +36,20 @@ public class SplashInterface extends JPanel implements UserInterface {
     registerBtn.addActionListener(this::clickRegister);
   }
 
-  @Override
-  public void showInFrame(JFrame parent) {
-    parent.setContentPane(this);
-    parent.getRootPane().setDefaultButton(loginBtn);
-    parent.setTitle("用户登录");
-    parent.pack();
-  }
 
   @Override
-  public void putArgument(String key, Object value) { }
+  public void showInFrame(JFrame parent) {
+    UiHelper.onFrameCenter(parent, frame -> {
+      frame.setContentPane(this);
+      frame.getRootPane().setDefaultButton(loginBtn);
+      frame.setTitle("用户登录");
+    });
+  }
 
   @SuppressWarnings("Duplicates")
   private void createSelf() {
-    idField = new JTextField("001");
-    pwField = new JPasswordField("111");
+    idField = new JTextField();
+    pwField = new JPasswordField();
     JLabel idLabel = new JLabel(" ID:", JLabel.TRAILING);
     JLabel pwLabel = new JLabel("PWD:", JLabel.TRAILING);
     idLabel.setLabelFor(idField);
@@ -93,7 +92,7 @@ public class SplashInterface extends JPanel implements UserInterface {
   /** @see #idField */
   private void enterOnIdField(ActionEvent actionEvent) {
     if (pwField.getText().isEmpty()) {
-      pwField.transferFocus();
+      pwField.requestFocusInWindow();
     } else {
       clickLogin(actionEvent);
     }
@@ -122,6 +121,7 @@ public class SplashInterface extends JPanel implements UserInterface {
       user = JDBCUtilities.dbop(conn -> {return Teacher.retrieveOne(conn, inputId);});
       Interface = TeacherInterface::new;
     } else {
+      // should not happen
       JOptionPane.showMessageDialog(this, "单选框未选中", "异常发生", JOptionPane.WARNING_MESSAGE);
       return;
     }

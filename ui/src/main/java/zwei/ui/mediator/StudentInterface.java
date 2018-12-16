@@ -29,6 +29,8 @@ public class StudentInterface extends JPanel implements UserInterface {
   private JButton searchBtn;
   private JTextField scoreArea;
   private StudentCourseListModel courseListModel;
+  private JLabel nameMenuLabel;
+  private JMenuBar menuBar;
 
   public StudentInterface() {
     createSelf();
@@ -117,6 +119,9 @@ public class StudentInterface extends JPanel implements UserInterface {
     setBorder(BorderFactory.createEmptyBorder(8, 8, 8, 8));
     add(leftPanel, BorderLayout.WEST);
     add(rightPanel, BorderLayout.CENTER);
+
+    menuBar = new JMenuBar();
+    setMenubar(menuBar);
   }
 
   private void fillInData(Student student) {
@@ -148,21 +153,39 @@ public class StudentInterface extends JPanel implements UserInterface {
     scoreArea.setBorder(border);
   }
 
-  @Override
-  public void showInFrame(JFrame parent) {
-    parent.setContentPane(this);
-    parent.setTitle("学生页面");
-    parent.pack();
-    parent.setMinimumSize(parent.getSize());
+  @SuppressWarnings("Duplicates")
+  private void setMenubar(JMenuBar menuBar) {
+    nameMenuLabel = new JLabel();
+    JMenu     menu = new JMenu("账户");
+    JMenuItem item = new JMenuItem("登出");
+    item.addActionListener(this::clickLogout);
+    menu.add(nameMenuLabel);
+    menu.addSeparator();
+    menu.add(item);
+    menuBar.add(menu);
   }
 
-  @SuppressWarnings("CastToConcreteClass")
   @Override
   public void putArgument(String key, Object value) {
     if ("user".equals(key)) {
       Student student = (Student) value;
+      nameMenuLabel.setText("学生: " + student.getStudentName());
       fillInData(student);
     }
+  }
+
+  @Override
+  public void showInFrame(JFrame parent) {
+    UiHelper.onFrameCenter(parent, frame -> {
+      frame.setContentPane(this);
+      frame.setJMenuBar(menuBar);
+      frame.setTitle("学生页面");
+    });
+  }
+
+  private void clickLogout(ActionEvent actionEvent) {
+    JFrame frame          = (JFrame) SwingUtilities.windowForComponent(this);
+    UiHelper.changeFrameContent(frame, new SplashInterface());
   }
 
   public static void main(String[] args) {

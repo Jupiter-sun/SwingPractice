@@ -61,7 +61,7 @@ public final class JDBCUtilities {
 
   /** 连接到数据库，以sql的结果创建RowSet对象 */
   public FilteredRowSet newRowSet(@Language("sql") String sql,
-      @Nullable StatementPromoter<RowSet> addOn) {
+      @Nullable StatementPromoter<? super RowSet> addOn) {
     FilteredRowSet frs;
     try {
       frs = RowSetProvider.newFactory().createFilteredRowSet();
@@ -76,6 +76,21 @@ public final class JDBCUtilities {
     }
     return frs;
   }
+
+  /** 连接到数据库，以sql的结果创建RowSet对象 */
+  public FilteredRowSet newRowSet() {
+    FilteredRowSet frs;
+    try {
+      frs = RowSetProvider.newFactory().createFilteredRowSet();
+      frs.setType(ResultSet.TYPE_SCROLL_INSENSITIVE);
+      frs.setConcurrency(ResultSet.CONCUR_UPDATABLE);
+    } catch (SQLException e) {
+      printSQLException(e);
+      throw new RuntimeException(e);
+    }
+    return frs;
+  }
+
 
   /** @throws NullPointerException cannot get connection */
   @SuppressWarnings("CallToDriverManagerGetConnection")

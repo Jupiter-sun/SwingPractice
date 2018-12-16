@@ -5,22 +5,27 @@ import org.jetbrains.annotations.Nullable;
 import zwei.JDBCUtilities;
 
 import java.io.Serializable;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
 public class Course implements Serializable {
 
   private static final long serialVersionUID = 990509107342952766L;
-  @NotNull private Long id;
+  private Long id;
   @NotNull private String name;
   @NotNull private Teacher teacher;
 
   private Course() {}
 
   public void updateInsertRow(ResultSet rowSet) throws SQLException {
-    rowSet.updateLong("id", id);
+    if (id != null) {
+      rowSet.updateLong("id", id);
+    }
     rowSet.updateString("name", name);
     rowSet.updateString("teacher", teacher.getId());
   }
@@ -83,12 +88,52 @@ public class Course implements Serializable {
     return null;
   }
 
+  /**
+   * @return 在本课程上的学生的列表
+   */
+  @NotNull
+  public List<Student> linkedStudents(Connection conn) {
+    try (
+        PreparedStatement statement = conn.prepareStatement(
+            "select id, password, name, class_name, major_name from course_student join student s on s.id = course_student.student where course = ?")) {
+      statement.setLong(1, id);
+      try (ResultSet resultSet = statement.executeQuery()) {
+        return Student.parseResultSet(resultSet);
+      }
+    } catch (SQLException e) {
+      JDBCUtilities.printSQLException(e);
+    }
+    return Collections.emptyList();
+  }
+
+  /**
+   * @return 不在本课程上的学生的列表
+   */
+  @NotNull
+  public List<Student> nonLinkedStudents(Connection conn) {
+    try (
+        PreparedStatement statement = conn.prepareStatement(
+            "select id, password, name, class_name, major_name from student s where s.id not in ( select l.student from course_student l where l.course = ? )")) {
+      statement.setLong(1, id);
+      try (ResultSet resultSet = statement.executeQuery()) {
+        return Student.parseResultSet(resultSet);
+      }
+    } catch (SQLException e) {
+      JDBCUtilities.printSQLException(e);
+    }
+    return Collections.emptyList();
+  }
+
   public Long getId() {
     return id;
   }
 
   public String getName() {
     return name;
+  }
+
+  public Teacher getTeacher() {
+    return teacher;
   }
 
   public List<Student> getStudents() {

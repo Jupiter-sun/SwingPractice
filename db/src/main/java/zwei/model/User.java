@@ -33,15 +33,17 @@ public abstract class User implements Serializable {
   }
 
   /**
-   * 摘要算法对密码取哈希值
+   * 加盐摘要算法对密码取哈希值
    */
-  private static String hashString(String input) {
+  private String hashString(String input) {
     try {
       MessageDigest md = MessageDigest.getInstance("MD5");
 
-      byte[] digest = md.digest(input.getBytes(StandardCharsets.UTF_8));
+      md.update(uid.getBytes(StandardCharsets.UTF_8));
+      md.update(input.getBytes(StandardCharsets.UTF_8));
+      byte[] digest = md.digest();
       return DatatypeConverter.printHexBinary(digest);
-    } catch (NoSuchAlgorithmException e) {throw new RuntimeException(e);}
+    } catch (NoSuchAlgorithmException e) {throw new UnsupportedOperationException(e);}
   }
 
   /* Getters */

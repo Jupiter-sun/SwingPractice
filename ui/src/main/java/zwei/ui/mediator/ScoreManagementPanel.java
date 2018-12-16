@@ -38,24 +38,37 @@ public class ScoreManagementPanel extends JPanel {
   public ScoreManagementPanel() {
     createSelf();
 
-    tableModel = new TeacherScoreTableModel();
-    scoreTable.setModel(tableModel);
     coursePlusBtn.addActionListener(this::createCourse);
     courseMinusBtn.addActionListener(this::deleteCourse);
     courseRefreshBtn.addActionListener(this::refreshCourse);
+    scorePlusBtn.addActionListener(this::createScore);
+    scoreMinusBtn.addActionListener(this::deleteScore);
+    scoreRefreshBtn.addActionListener(this::refreshScore);
     courseList.addListSelectionListener(e -> {
-      if (!e.getValueIsAdjusting()) return;
+      if (e.getValueIsAdjusting()) return;
       Course selectedValue = courseList.getSelectedValue();
       if (selectedValue != null) {
+        scorePlusBtn.setEnabled(true);
+        scoreMinusBtn.setEnabled(true);
+        scoreRefreshBtn.setEnabled(true);
         tableModel.setCourse(selectedValue);
+      } else {
+        scorePlusBtn.setEnabled(false);
+        scoreMinusBtn.setEnabled(false);
+        scoreRefreshBtn.setEnabled(false);
       }
     });
   }
 
   public void setUser(Teacher teacher) {
     this.teacher = teacher;
+    tableModel = new TeacherScoreTableModel();
+    scoreTable.setModel(tableModel);
     listModel = new TeacherCourseListModel(teacher);
     courseList.setModel(listModel);
+    if (listModel.getSize() > 0) {
+      courseList.setSelectedIndex(0);
+    }
   }
 
   @SuppressWarnings("Duplicates")
@@ -87,7 +100,7 @@ public class ScoreManagementPanel extends JPanel {
     menuBar.add(menu);
   }
 
-  private void createCourse(ActionEvent actionEvent) {
+  private void createCourse(@SuppressWarnings("unused") ActionEvent actionEvent) {
     String name =
         JOptionPane.showInputDialog(this, "课程的名字", "新建课程", JOptionPane.QUESTION_MESSAGE);
     if (name == null || name.isEmpty()) return;
@@ -97,52 +110,61 @@ public class ScoreManagementPanel extends JPanel {
     }
   }
 
-  private void deleteCourse(ActionEvent actionEvent) {
+  private void deleteCourse(@SuppressWarnings("unused") ActionEvent actionEvent) {
     int selectedIndex = courseList.getSelectedIndex();
     if (selectedIndex != -1) {
       listModel.deleteOne(selectedIndex);
+      courseList.setSelectedIndex(selectedIndex - 1);
     }
   }
 
-  private void refreshCourse(ActionEvent actionEvent) {
+  private void refreshCourse(@SuppressWarnings("unused") ActionEvent actionEvent) {
     listModel.refreshList();
   }
 
-  private void createScore(ActionEvent actionEvent) {
-    CreateScoreDialog dialog = new CreateScoreDialog();
+  private void createScore(@SuppressWarnings("unused") ActionEvent actionEvent) {
+    Course selectedCourse = courseList.getSelectedValue();
+    if (selectedCourse == null) {
+      courseList.requestFocusInWindow();
+      return;
+    }
+
+    CreateScoreDialog dialog = new CreateScoreDialog(selectedCourse);
     dialog.setModal(true);
     dialog.setLocationRelativeTo(this);
     dialog.setVisible(true);
+
+    // parse result
     Student    student = dialog.getUserInputStudent();
     BigDecimal score   = dialog.getUserInputScore();
     if (student != null && score != null) {
-      Course course = courseList.getSelectedValue();
-      if (course == null) {
-        courseList.transferFocus();
-        return;
-      }
       tableModel.createRow(student, score);
     }
   }
 
-  private void deleteScore(ActionEvent actionEvent) {
+  private void deleteScore(@SuppressWarnings("unused") ActionEvent actionEvent) {
     int[] selectedRows = scoreTable.getSelectedRows();
     if (selectedRows.length == 0) return;
     tableModel.removeRow(selectedRows);
   }
 
-  private void refreshScore(ActionEvent actionEvent) {
-    listModel.refreshList();
+  private void refreshScore(@SuppressWarnings("unused") ActionEvent actionEvent) {
+    tableModel.refreshTable();
   }
 
   @SuppressWarnings("Duplicates")
   private void createSelf() {
+    // left list
     courseList = new JList<>();
     courseList.setLayoutOrientation(JList.VERTICAL);
     courseList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
     UiHelper.setListRender(courseList, Course::getName);
+
+    // left list title
     JLabel leftHint = new JLabel("课程列表");
     leftHint.setLabelFor(courseList);
+
+    // left controller button groups
     coursePlusBtn = new JButton(loadImage("iconmonstr-plus-1-16.png"));
     courseMinusBtn = new JButton(loadImage("iconmonstr-minus-1-16.png"));
     courseRefreshBtn = new JButton(loadImage("iconmonstr-refresh-3-16.png"));
@@ -154,20 +176,17 @@ public class ScoreManagementPanel extends JPanel {
     leftBtnPanel.add(courseMinusBtn);
     leftBtnPanel.add(courseRefreshBtn);
 
+    // right table
     scoreTable = new JTable();
+    scoreTable.setFillsViewportHeight(true);
     UiHelper.setZebraStyle(scoreTable, String.class);
     UiHelper.setZebraStyle(scoreTable, BigDecimal.class);
-    JPanel leftPanel  = new JPanel();
-    JPanel rightPanel = new JPanel();
 
-    leftPanel.setLayout(new BorderLayout());
-    leftPanel.add(leftHint, BorderLayout.NORTH);
-    leftPanel.add(courseList, BorderLayout.CENTER);
-    leftPanel.add(leftBtnPanel, BorderLayout.SOUTH);
-
+    // right table title
     JLabel rightHint = new JLabel("学生列表");
     rightHint.setLabelFor(courseList);
 
+    // right controller button groups
     scorePlusBtn = new JButton("添加");
     scoreMinusBtn = new JButton("删除");
     scoreRefreshBtn = new JButton("刷新");
@@ -176,18 +195,33 @@ public class ScoreManagementPanel extends JPanel {
     rightBtnPanel.add(scoreMinusBtn);
     rightBtnPanel.add(scoreRefreshBtn);
 
+    // split panel components
+    JPanel leftPanel  = new JPanel();
+    JPanel rightPanel = new JPanel();
+
+    // build left split panel
+    leftPanel.setLayout(new BorderLayout());
+    leftPanel.add(leftHint, BorderLayout.NORTH);
+    leftPanel.add(courseList, BorderLayout.CENTER);
+    leftPanel.add(leftBtnPanel, BorderLayout.SOUTH);
+
+    // build right split panel
     rightPanel.setLayout(new BorderLayout());
     rightPanel.add(rightHint, BorderLayout.NORTH);
-    rightPanel.add(scoreTable, BorderLayout.CENTER);
+    rightPanel.add(new JScrollPane(scoreTable), BorderLayout.CENTER);
     rightPanel.add(rightBtnPanel, BorderLayout.SOUTH);
 
-    JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, leftPanel, rightPanel);
+    // hock up content panel components
+    JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
+    splitPane.setLeftComponent(leftPanel);
+    splitPane.setRightComponent(rightPanel);
     setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 5));
     setBackground(UserInterface.commonBackGround);
     setLayout(new BorderLayout());
     add(splitPane, BorderLayout.CENTER);
   }
 
+  /** UI Test */
   public static void main(String[] args) {
     try (BufferedReader reader = Files.newBufferedReader(Paths.get("/Volumes/RAM/coupon.sample"))) {
       reader.lines().forEach(System.out::println);
