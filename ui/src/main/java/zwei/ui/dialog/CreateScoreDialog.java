@@ -1,9 +1,10 @@
-package zwei.ui.mediator;
+package zwei.ui.dialog;
 
 import org.jetbrains.annotations.Nullable;
 import zwei.JDBCUtilities;
 import zwei.model.Course;
 import zwei.model.Student;
+import zwei.ui.UiHelper;
 
 import javax.swing.*;
 import java.awt.*;
@@ -13,6 +14,7 @@ import java.sql.Connection;
 import java.util.List;
 
 /**
+ * 添加学生分数记录用的输入提示窗
  * Created on 2018-12-14
  *
  * @author 九条涼果 chunxiang.huang@hypers.com
@@ -21,29 +23,39 @@ public class CreateScoreDialog extends JDialog {
 
   private static final long serialVersionUID = -2985032488653700623L;
 
+  /** 学生选择下拉框 */
   private JComboBox<Student> studentBox;
+  /** 分数输入文本框 */
   private JTextField scoreField;
 
+  /** 确认按钮 */
   private JButton confirmBtn;
+  /** 取消按钮 */
   private JButton cancelBtn;
 
+  /** 临时保存创建的学生对象，供客户端在{@link #getUserInputStudent()}获取 */
   private transient Student userInputStudent;
+  /** 临时保存创建的分数对象，供客户端在{@link #getUserInputScore()}}获取 */
   private transient BigDecimal userInputScore;
 
   public CreateScoreDialog(@Nullable Course course) {
     createSelf();
+
+    /*设置下拉框内容为学生列表*/
     Connection connection = JDBCUtilities.getInstance().getConnection();
     List<Student> students = (course == null) ?
         Student.retrieveALl(connection) :
         course.nonLinkedStudents(JDBCUtilities.getInstance().getConnection());
     studentBox.setModel(new DefaultComboBoxModel<>(students.toArray(new Student[0])));
 
+    /*添加操作回调函数*/
     studentBox.addItemListener(e -> studentBox.transferFocus());
     scoreField.addActionListener(this::clickOk);
     confirmBtn.addActionListener(this::clickOk);
     cancelBtn.addActionListener(this::clickCancel);
   }
 
+  /** 处理用户点击OK按钮的事件 */
   private void clickOk(ActionEvent actionEvent) {
     Object item      = studentBox.getSelectedItem();
     String scoreText = scoreField.getText();
@@ -65,6 +77,7 @@ public class CreateScoreDialog extends JDialog {
     }
   }
 
+  /** 处理用户点击Cancel按钮的事件 */
   private void clickCancel(ActionEvent actionEvent) {
     dispose();
   }
@@ -138,12 +151,5 @@ public class CreateScoreDialog extends JDialog {
   @Nullable
   public BigDecimal getUserInputScore() {
     return userInputScore;
-  }
-
-  public static void main(String[] args) {
-    Window dialog = new CreateScoreDialog(null);
-    dialog.pack();
-    dialog.setVisible(true);
-    dialog.setLocationRelativeTo(null);
   }
 }

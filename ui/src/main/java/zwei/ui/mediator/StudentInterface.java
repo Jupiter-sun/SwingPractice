@@ -2,6 +2,7 @@ package zwei.ui.mediator;
 
 import zwei.model.CourseStudentLink;
 import zwei.model.Student;
+import zwei.ui.UiHelper;
 import zwei.ui.table.StudentCourseListModel;
 
 import javax.swing.*;
@@ -20,16 +21,28 @@ public class StudentInterface extends JPanel implements UserInterface {
 
   private static final long serialVersionUID = -3427522772908306608L;
 
+  /** 学号显示 */
   private JLabel idLabel;
+  /** 姓名显示 */
   private JLabel nmLabel;
+  /** 班级显示 */
   private JLabel clLabel;
+  /** 学科显示 */
   private JLabel sjLabel;
 
+  /** 课程下拉框 */
   private JComboBox<String> courseDropdown;
+
+  /** 搜索按钮 */
   private JButton searchBtn;
+  /** 展示分数的区域 */
   private JTextField scoreArea;
+
+  /** 学生课程列表 */
   private StudentCourseListModel courseListModel;
+  /** 菜单栏中显示学生名字的文本 */
   private JLabel nameMenuLabel;
+  /** 窗口菜单栏 */
   private JMenuBar menuBar;
 
   public StudentInterface() {
@@ -124,6 +137,7 @@ public class StudentInterface extends JPanel implements UserInterface {
     setMenubar(menuBar);
   }
 
+  /** 设置学生信息 */
   private void fillInData(Student student) {
     idLabel.setText(student.getStudentId());
     nmLabel.setText(student.getStudentName());
@@ -135,10 +149,11 @@ public class StudentInterface extends JPanel implements UserInterface {
     searchBtn.addActionListener(this::fireSearch);
   }
 
+  /** 处理用户点击搜索按钮的事件 */
   @SuppressWarnings("MagicNumber")
   private void fireSearch(ActionEvent actionEvent) {
-    CourseStudentLink item   = courseListModel.getSelected();
-    BigDecimal        score  = item.getScore();
+    CourseStudentLink item  = courseListModel.getSelected();
+    BigDecimal        score = item.getScore();
 
     String scoreText = score.stripTrailingZeros().toPlainString();
     scoreArea.setText(String.format("%s分", scoreText));
@@ -169,7 +184,9 @@ public class StudentInterface extends JPanel implements UserInterface {
   public void putArgument(String key, Object value) {
     if ("user".equals(key)) {
       Student student = (Student) value;
+      /*设置菜单栏上学生名字*/
       nameMenuLabel.setText("学生: " + student.getStudentName());
+      /*设置左侧栏的一大堆学生信息*/
       fillInData(student);
     }
   }
@@ -183,16 +200,9 @@ public class StudentInterface extends JPanel implements UserInterface {
     });
   }
 
+  /** 处理用户点击菜单栏上登出按钮的事件 */
   private void clickLogout(ActionEvent actionEvent) {
-    JFrame frame          = (JFrame) SwingUtilities.windowForComponent(this);
+    JFrame frame = (JFrame) SwingUtilities.windowForComponent(this);
     UiHelper.changeFrameContent(frame, new SplashInterface());
-  }
-
-  public static void main(String[] args) {
-    JFrame        frame     = new JFrame();
-    UserInterface Interface = new StudentInterface();
-    Interface.showInFrame(frame);
-    frame.setLocationRelativeTo(null);
-    frame.setVisible(true);
   }
 }

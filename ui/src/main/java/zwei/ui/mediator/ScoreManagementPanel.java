@@ -3,35 +3,48 @@ package zwei.ui.mediator;
 import zwei.model.Course;
 import zwei.model.Student;
 import zwei.model.Teacher;
+import zwei.ui.UiHelper;
+import zwei.ui.dialog.CreateScoreDialog;
 import zwei.ui.table.TeacherCourseListModel;
 import zwei.ui.table.TeacherScoreTableModel;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.io.BufferedReader;
-import java.io.IOException;
 import java.math.BigDecimal;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 
-import static zwei.ui.mediator.UiHelper.loadImage;
+import static zwei.ui.UiHelper.loadImage;
 
+/**
+ * 教师界面，分数管理面板
+ * Created on 2018-12-12
+ *
+ * @author 九条涼果 chunxiang.huang@hypers.com
+ */
 public class ScoreManagementPanel extends JPanel {
 
   private static final long serialVersionUID = -8894106068059978594L;
   private Teacher teacher;
 
+  /** 添加课程按钮 */
   private JButton coursePlusBtn;
+  /** 移除课程按钮 */
   private JButton courseMinusBtn;
+  /** 刷新课程列表按钮 */
   private JButton courseRefreshBtn;
 
+  /** 添加分数记录按钮 */
   private JButton scorePlusBtn;
+  /** 移除分数记录按钮 */
   private JButton scoreMinusBtn;
+  /** 刷新分数列表按钮 */
   private JButton scoreRefreshBtn;
 
+  /** 课程列表 */
   private JList<Course> courseList;
   private TeacherCourseListModel listModel;
+
+  /** 在这个课程上的学生的分数列表 */
   private JTable scoreTable;
   private TeacherScoreTableModel tableModel;
 
@@ -60,6 +73,10 @@ public class ScoreManagementPanel extends JPanel {
     });
   }
 
+  /**
+   * 传递参数，这是哪个老师的课程。
+   * 不同老师会对应有不同的学生列表
+   */
   public void setUser(Teacher teacher) {
     this.teacher = teacher;
     tableModel = new TeacherScoreTableModel();
@@ -71,6 +88,7 @@ public class ScoreManagementPanel extends JPanel {
     }
   }
 
+  /** 跳转到这个面板的时候，给窗体设置菜单栏 */
   @SuppressWarnings("Duplicates")
   public void setMenubar(JMenuBar menuBar) {
     JMenu menu = new JMenu("分数管理");
@@ -100,6 +118,7 @@ public class ScoreManagementPanel extends JPanel {
     menuBar.add(menu);
   }
 
+  /** 处理用户点击添加课程按钮的事件 */
   private void createCourse(@SuppressWarnings("unused") ActionEvent actionEvent) {
     String name =
         JOptionPane.showInputDialog(this, "课程的名字", "新建课程", JOptionPane.QUESTION_MESSAGE);
@@ -110,6 +129,7 @@ public class ScoreManagementPanel extends JPanel {
     }
   }
 
+  /** 处理用户点击移除课程按钮的事件，支持多选 */
   private void deleteCourse(@SuppressWarnings("unused") ActionEvent actionEvent) {
     int selectedIndex = courseList.getSelectedIndex();
     if (selectedIndex != -1) {
@@ -118,10 +138,12 @@ public class ScoreManagementPanel extends JPanel {
     }
   }
 
+  /** 处理用户点击刷新课程按钮的事件 */
   private void refreshCourse(@SuppressWarnings("unused") ActionEvent actionEvent) {
     listModel.refreshList();
   }
 
+  /** 处理用户点击添加分数按钮的事件，弹出对话框 */
   private void createScore(@SuppressWarnings("unused") ActionEvent actionEvent) {
     Course selectedCourse = courseList.getSelectedValue();
     if (selectedCourse == null) {
@@ -142,12 +164,14 @@ public class ScoreManagementPanel extends JPanel {
     }
   }
 
+  /** 处理用户点击移除分数按钮的事件，支持多选 */
   private void deleteScore(@SuppressWarnings("unused") ActionEvent actionEvent) {
     int[] selectedRows = scoreTable.getSelectedRows();
     if (selectedRows.length == 0) return;
     tableModel.removeRow(selectedRows);
   }
 
+  /** 处理用户点击刷新分数按钮的事件 */
   private void refreshScore(@SuppressWarnings("unused") ActionEvent actionEvent) {
     tableModel.refreshTable();
   }
@@ -216,17 +240,8 @@ public class ScoreManagementPanel extends JPanel {
     splitPane.setLeftComponent(leftPanel);
     splitPane.setRightComponent(rightPanel);
     setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 5));
-    setBackground(UserInterface.commonBackGround);
+    setBackground(UserInterface.commonBackground);
     setLayout(new BorderLayout());
     add(splitPane, BorderLayout.CENTER);
-  }
-
-  /** UI Test */
-  public static void main(String[] args) {
-    try (BufferedReader reader = Files.newBufferedReader(Paths.get("/Volumes/RAM/coupon.sample"))) {
-      reader.lines().forEach(System.out::println);
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
   }
 }

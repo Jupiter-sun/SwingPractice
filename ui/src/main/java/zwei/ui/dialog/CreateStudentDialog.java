@@ -1,4 +1,4 @@
-package zwei.ui.mediator;
+package zwei.ui.dialog;
 
 import org.jetbrains.annotations.Nullable;
 import zwei.model.Student;
@@ -8,6 +8,7 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 
 /**
+ * 添加学生条目记录用的输入提示窗
  * Created on 2018-12-14
  *
  * @author 九条涼果 chunxiang.huang@hypers.com
@@ -16,20 +17,29 @@ public class CreateStudentDialog extends JDialog {
 
   private static final long serialVersionUID = -2985032488653700623L;
 
+  /** 学号输入文本框 */
   private JTextField idField;
+  /** 密码输入文本框 */
   private JTextField pwField;
+  /** 姓名输入文本框 */
   private JTextField nmField;
+  /** 班级输入文本框 */
   private JTextField clField;
+  /** 学科输入文本框 */
   private JTextField mjField;
 
+  /** 确认按钮 */
   private JButton confirmBtn;
+  /** 取消按钮 */
   private JButton cancelBtn;
 
+  /**临时保存创建的对象，供客户端在{@link #getUserInput()}获取*/
   private transient Student userInput;
 
   public CreateStudentDialog() {
     createSelf();
 
+    /*添加操作回调函数*/
     idField.addActionListener((e) -> idField.transferFocus());
     pwField.addActionListener((e) -> pwField.transferFocus());
     nmField.addActionListener((e) -> nmField.transferFocus());
@@ -39,6 +49,7 @@ public class CreateStudentDialog extends JDialog {
     cancelBtn.addActionListener(this::clickCancel);
   }
 
+  /**处理用户点击OK按钮的事件*/
   private void clickOk(ActionEvent actionEvent) {
     String id = idField.getText();
     String pw = pwField.getText();
@@ -62,6 +73,7 @@ public class CreateStudentDialog extends JDialog {
     }
   }
 
+  /** 处理用户点击Cancel按钮的事件 */
   private void clickCancel(ActionEvent actionEvent) {
     dispose();
   }
@@ -146,12 +158,5 @@ public class CreateStudentDialog extends JDialog {
   @Nullable
   public Student getUserInput() {
     return userInput;
-  }
-
-  public static void main(String[] args) {
-    Window dialog = new CreateStudentDialog();
-    dialog.pack();
-    dialog.setVisible(true);
-    dialog.setLocationRelativeTo(null);
   }
 }

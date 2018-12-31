@@ -3,6 +3,7 @@ plugins {
 }
 
 dependencies {
+    compileOnly group: 'com.apple', name: 'AppleJavaExtensions', version: '1.4'
 }
 
 mainClassName = "zwei.ui.Main"

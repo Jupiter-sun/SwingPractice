@@ -40,6 +40,7 @@ public class TeacherScoreTableModel extends AbstractTableModel {
   }
 
   /** 创建新的行，使用用户输入的数据创建学生账号 */
+  @SuppressWarnings("Duplicates")
   public void createRow(@NotNull Student student, BigDecimal score) {
     CourseStudentLink link = CourseStudentLink.createOne(student, course, score);
     try {
@@ -75,6 +76,7 @@ public class TeacherScoreTableModel extends AbstractTableModel {
     }
   }
 
+  /**从数据库中移除一个分数记录*/
   public void removeRow(@NotNull int[] selectedRows) {
     try {
       for (int row : selectedRows) {
@@ -98,6 +100,7 @@ public class TeacherScoreTableModel extends AbstractTableModel {
     }
   }
 
+  /**刷新列表，从数据库中拉取最新数据*/
   public void refreshTable() {
     // 用户没有选中左侧列表，会导致course为null
     if (course == null) return;
@@ -154,6 +157,7 @@ public class TeacherScoreTableModel extends AbstractTableModel {
     }
   }
 
+  /**在列表中编辑分数，同步到数据库中*/
   @Override
   public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
     try {

@@ -4,35 +4,50 @@ import zwei.JDBCUtilities;
 import zwei.model.Student;
 import zwei.model.Teacher;
 import zwei.model.User;
+import zwei.ui.UiHelper;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 
+/**
+ * 用户注册的界面
+ * Created on 2018-12-11
+ *
+ * @author 九条涼果 chunxiang.huang@hypers.com
+ */
 public class RegisterInterface extends JPanel implements UserInterface {
 
   private static final long serialVersionUID = -5795654569586694048L;
 
+  /** 注册的用户类型 */
   private Class<? extends User> type;
 
+  /** 用户ID输入文本框 */
   private JTextField idField;
+  /** 密码输入文本框 */
   private JTextField pwField;
+  /** 姓名输入文本框 */
   private JTextField nmField;
 
+  /** 返回按钮 */
   private JButton backBtn;
+  /** 注册按钮 */
   private JButton registerBtn;
 
+  /** 保存来源状态，用于还原到上一个界面 */
   private Memento parentState;
 
   public RegisterInterface(Class<? extends User> type) {
     this.type = type;
 
     createSelf();
+
+    /*添加操作回调函数*/
     idField.addActionListener((e) -> idField.transferFocus());
     nmField.addActionListener((e) -> nmField.transferFocus());
     pwField.addActionListener(this::clickRegister);
-
     backBtn.addActionListener(this::backward);
     registerBtn.addActionListener(this::clickRegister);
   }
@@ -81,6 +96,7 @@ public class RegisterInterface extends JPanel implements UserInterface {
     add(lstPanel);
   }
 
+  /** 处理用户点击注册按钮的事件 */
   private void clickRegister(ActionEvent actionEvent) {
     String inputId       = idField.getText();
     String inputName     = nmField.getText();
@@ -104,12 +120,14 @@ public class RegisterInterface extends JPanel implements UserInterface {
     }
   }
 
+  /** 处理用户点击返回按钮的事件 */
   private void backward(ActionEvent actionEvent) {
     if (parentState != null) {
       parentState.revert();
     }
   }
 
+  /** 储存来源JFrame */
   private static Memento backup(JFrame parent) {
     Memento memento = new Memento();
     memento.frame = parent;

@@ -62,6 +62,7 @@ public class StudentTableModel extends AbstractTableModel {
     }
   }
 
+  /** 移除行 */
   public void removeRow(@NotNull int[] selectedRows) {
     try {
       for (int row : selectedRows) {
@@ -78,6 +79,7 @@ public class StudentTableModel extends AbstractTableModel {
     }
   }
 
+  /** 触发刷新事件 */
   public void refreshTable() {
     rowSet = JDBCUtilities.getInstance()
         .newRowSet("select id, name, class_name, major_name, password from student");
@@ -91,6 +93,7 @@ public class StudentTableModel extends AbstractTableModel {
     }
   }
 
+  /** 过滤结果 */
   public void narrowDown(String searchFor) {
     filter.setKeyword(searchFor);
     fireTableDataChanged();
@@ -146,6 +149,7 @@ public class StudentTableModel extends AbstractTableModel {
     }
   }
 
+  /** 在列表中编辑用户数据，同步到数据库中 */
   @Override
   public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
     try {

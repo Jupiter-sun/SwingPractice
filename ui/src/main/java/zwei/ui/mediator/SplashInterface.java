@@ -4,6 +4,7 @@ import zwei.JDBCUtilities;
 import zwei.model.Student;
 import zwei.model.Teacher;
 import zwei.model.User;
+import zwei.ui.UiHelper;
 
 import javax.swing.*;
 import java.awt.event.ActionEvent;
@@ -18,18 +19,25 @@ public class SplashInterface extends JPanel implements UserInterface {
 
   private static final long serialVersionUID = 5251739093646189753L;
 
+  /** 用户ID输入文本框 */
   private JTextField idField;
+  /** 密码输入文本框 */
   private JTextField pwField;
 
+  /** 选择登录类型为学生的单选框 */
   private JRadioButton stuRadioBtn;
+  /** 选择登录类型为教师的单选框 */
   private JRadioButton teaRadioBtn;
 
+  /** 登录按钮 */
   private JButton loginBtn;
+  /** 注册按钮 */
   private JButton registerBtn;
 
   public SplashInterface() {
     createSelf();
 
+    /*添加操作回调函数*/
     idField.addActionListener(this::enterOnIdField);
     pwField.addActionListener(this::clickLogin);
     loginBtn.addActionListener(this::clickLogin);
@@ -164,15 +172,6 @@ public class SplashInterface extends JPanel implements UserInterface {
     setVisible(false);
     Interface.showInFrame(frame);
     // no need to pack
-  }
-
-  /** Preview UI */
-  public static void main(String[] args) {
-    JFrame frame = new JFrame();
-    UserInterface Interface = new SplashInterface();
-    Interface.showInFrame(frame);
-    frame.setLocationRelativeTo(null);
-    frame.setVisible(true);
   }
 }
 
