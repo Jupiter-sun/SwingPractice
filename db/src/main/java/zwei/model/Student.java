@@ -14,8 +14,8 @@ public class Student extends User {
   private static final long serialVersionUID = 5911518347954195350L;
 
   @NotNull private String name;
-  @NotNull private String className;
-  @NotNull private String majorName;
+  @NotNull private String className = "";
+  @NotNull private String majorName = "";
 
   private Student() {}
 

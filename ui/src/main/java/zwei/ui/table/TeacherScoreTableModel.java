@@ -64,7 +64,7 @@ public class TeacherScoreTableModel extends AbstractTableModel {
         refreshTable();
 
         SyncResolver resolver = e.getSyncResolver();
-        resolver.nextConflict();
+        if (!resolver.nextConflict()) return;
         if (resolver.getStatus() == SyncResolver.INSERT_ROW_CONFLICT) {
           JOptionPane.showMessageDialog(null, "ID已存在", "保存失败", JOptionPane.ERROR_MESSAGE);
         } else {
