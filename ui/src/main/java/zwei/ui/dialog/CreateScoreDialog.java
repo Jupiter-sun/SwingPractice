@@ -1,7 +1,8 @@
 package zwei.ui.dialog;
 
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import zwei.JDBCUtilities;
+import zwei.dao.JDBCUtilities;
 import zwei.model.Course;
 import zwei.model.Student;
 import zwei.ui.UiHelper;
@@ -10,7 +11,6 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.math.BigDecimal;
-import java.sql.Connection;
 import java.util.List;
 
 /**
@@ -38,14 +38,11 @@ public class CreateScoreDialog extends JDialog {
   /** 临时保存创建的分数对象，供客户端在{@link #getUserInputScore()}}获取 */
   private transient BigDecimal userInputScore;
 
-  public CreateScoreDialog(@Nullable Course course) {
+  public CreateScoreDialog(@NotNull Course course) {
     createSelf();
 
     /*设置下拉框内容为学生列表*/
-    Connection connection = JDBCUtilities.getInstance().getConnection();
-    List<Student> students = (course == null) ?
-        Student.retrieveALl(connection) :
-        course.nonLinkedStudents(JDBCUtilities.getInstance().getConnection());
+    List<Student> students = course.nonLinkedStudents(JDBCUtilities.getInstance().getConnection());
     studentBox.setModel(new DefaultComboBoxModel<>(students.toArray(new Student[0])));
 
     /*添加操作回调函数*/

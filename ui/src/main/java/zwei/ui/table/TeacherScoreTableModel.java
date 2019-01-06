@@ -2,7 +2,7 @@ package zwei.ui.table;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import zwei.JDBCUtilities;
+import zwei.dao.JDBCUtilities;
 import zwei.model.Course;
 import zwei.model.CourseStudentLink;
 import zwei.model.Student;
@@ -79,7 +79,8 @@ public class TeacherScoreTableModel extends AbstractTableModel {
   /**从数据库中移除一个分数记录*/
   public void removeRow(@NotNull int[] selectedRows) {
     try {
-      for (int row : selectedRows) {
+      for (int i = selectedRows.length - 1; i >= 0; i--) {
+        int row = selectedRows[i];
         rowSet.absolute(row + 1); // row number start with one
         String studentId = rowSet.getString("id");
         try (
@@ -91,9 +92,8 @@ public class TeacherScoreTableModel extends AbstractTableModel {
         }
         System.out.println(
             "Delete score for student named " + studentId + " on course " + course.getName());
-        fireTableRowsDeleted(row, row);
       }
-      rowSet.execute(JDBCUtilities.getInstance().getConnection());
+      fireTableDataChanged();
     } catch (SQLException e) {
       JDBCUtilities.printSQLException(e);
       refreshTable();

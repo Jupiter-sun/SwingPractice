@@ -1,4 +1,4 @@
-package zwei;
+package zwei.dao;
 
 import org.intellij.lang.annotations.Language;
 import org.jetbrains.annotations.Nullable;
@@ -99,6 +99,7 @@ public final class JDBCUtilities {
       Connection conn = DriverManager.getConnection(dbUrl, username, password);
       if (conn != null) {
         System.out.println("Connected to database");
+        conn.setAutoCommit(false);
         return conn;
       }
     } catch (SQLException e) {

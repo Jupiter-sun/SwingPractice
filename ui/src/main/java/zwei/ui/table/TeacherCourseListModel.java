@@ -1,7 +1,7 @@
 package zwei.ui.table;
 
 import org.jetbrains.annotations.Nullable;
-import zwei.JDBCUtilities;
+import zwei.dao.JDBCUtilities;
 import zwei.model.Course;
 import zwei.model.Teacher;
 

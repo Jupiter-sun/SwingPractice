@@ -2,7 +2,7 @@ package zwei.model;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import zwei.JDBCUtilities;
+import zwei.dao.JDBCUtilities;
 
 import java.sql.*;
 import java.util.Collections;

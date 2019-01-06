@@ -1,6 +1,6 @@
 package zwei.ui;
 
-import zwei.JDBCUtilities;
+import zwei.dao.JDBCUtilities;
 import zwei.ui.mediator.SplashInterface;
 import zwei.ui.mediator.UserInterface;
 

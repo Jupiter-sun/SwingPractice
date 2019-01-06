@@ -1,6 +1,6 @@
 package zwei.ui.mediator;
 
-import zwei.JDBCUtilities;
+import zwei.dao.JDBCUtilities;
 import zwei.model.Student;
 import zwei.model.Teacher;
 import zwei.model.User;

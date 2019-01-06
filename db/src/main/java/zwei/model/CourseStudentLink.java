@@ -1,6 +1,6 @@
 package zwei.model;
 
-import zwei.JDBCUtilities;
+import zwei.dao.JDBCUtilities;
 
 import java.io.Serializable;
 import java.math.BigDecimal;

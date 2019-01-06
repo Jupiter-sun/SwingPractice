@@ -2,7 +2,7 @@ package zwei.ui.table;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import zwei.JDBCUtilities;
+import zwei.dao.JDBCUtilities;
 import zwei.model.Student;
 
 import javax.sql.RowSet;
@@ -14,6 +14,7 @@ import javax.swing.*;
 import javax.swing.table.AbstractTableModel;
 import java.sql.SQLException;
 import java.text.MessageFormat;
+import java.util.Arrays;
 import java.util.Objects;
 
 /**
@@ -65,14 +66,16 @@ public class StudentTableModel extends AbstractTableModel {
   /** 移除行 */
   public void removeRow(@NotNull int[] selectedRows) {
     try {
-      for (int row : selectedRows) {
+      Arrays.sort(selectedRows);
+      for (int i = selectedRows.length - 1; i >= 0; i--) {
+        int row = selectedRows[i];
         rowSet.absolute(row + 1); // row number start with one
         String name = rowSet.getString("name");
         rowSet.deleteRow();
-        rowSet.acceptChanges();
         System.out.println("Delete student named " + name);
-        fireTableRowsDeleted(row, row);
       }
+      rowSet.acceptChanges();
+      fireTableDataChanged();
     } catch (SQLException e) {
       JDBCUtilities.printSQLException(e);
       refreshTable();
