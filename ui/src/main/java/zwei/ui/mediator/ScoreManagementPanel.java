@@ -176,6 +176,7 @@ public class ScoreManagementPanel extends JPanel {
     tableModel.refreshTable();
   }
 
+  /** 创建UI界面 */
   @SuppressWarnings("Duplicates")
   private void createSelf() {
     // left list

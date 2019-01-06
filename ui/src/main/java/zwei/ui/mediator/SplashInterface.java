@@ -97,7 +97,11 @@ public class SplashInterface extends JPanel implements UserInterface {
     add(lstPanel);
   }
 
-  /** @see #idField */
+  /**
+   * 处理在用户名输入框按回车的事件
+   *
+   * @see #idField
+   */
   private void enterOnIdField(ActionEvent actionEvent) {
     if (pwField.getText().isEmpty()) {
       pwField.requestFocusInWindow();
@@ -106,7 +110,11 @@ public class SplashInterface extends JPanel implements UserInterface {
     }
   }
 
-  /** @see #loginBtn */
+  /**
+   * 处理在密码框按回车或者点击登录按钮的事件
+   *
+   * @see #loginBtn
+   */
   private void clickLogin(ActionEvent actionEvent) {
     String inputId       = idField.getText();
     String inputPassword = pwField.getText();
@@ -148,7 +156,11 @@ public class SplashInterface extends JPanel implements UserInterface {
     }
   }
 
-  /** @see #registerBtn */
+  /**
+   * 处理点击注册按钮的事件
+   *
+   * @see #registerBtn
+   */
   private void clickRegister(ActionEvent actionEvent) {
     Class<? extends User> type;
     if (stuRadioBtn.isSelected()) {

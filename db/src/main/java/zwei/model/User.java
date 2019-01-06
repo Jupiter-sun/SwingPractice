@@ -55,18 +55,4 @@ public abstract class User implements Serializable {
   protected String getPassword() {
     return password;
   }
-
-  public static void main(String[] args) {
-    try {
-      MessageDigest md = MessageDigest.getInstance("MD5");
-      for (int i = 1; i <4; i++) {
-        String input = String.format("%03d", i);
-        md.update(input.getBytes());
-        md.update("111".getBytes());
-        byte[] digest = md.digest();
-        String output = DatatypeConverter.printHexBinary(digest);
-        System.out.println(output);
-      }
-    } catch (NoSuchAlgorithmException e) {throw new RuntimeException(e);}
-  }
 }

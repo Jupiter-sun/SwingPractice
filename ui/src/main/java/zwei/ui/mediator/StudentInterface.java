@@ -49,6 +49,7 @@ public class StudentInterface extends JPanel implements UserInterface {
     createSelf();
   }
 
+  /** 创建UI界面 */
   @SuppressWarnings( {"Duplicates", "MagicNumber"})
   private void createSelf() {
 
@@ -157,6 +158,7 @@ public class StudentInterface extends JPanel implements UserInterface {
 
     String scoreText = score.stripTrailingZeros().toPlainString();
     scoreArea.setText(String.format("%s分", scoreText));
+    /*根据分数，按阶级设置边框颜色*/
     TitledBorder border = (TitledBorder) scoreArea.getBorder();
     if (score.compareTo(BigDecimal.valueOf(60)) < 0) {
       border.setBorder(BorderFactory.createLineBorder(new Color(0x6C200C)));
@@ -168,6 +170,7 @@ public class StudentInterface extends JPanel implements UserInterface {
     scoreArea.setBorder(border);
   }
 
+  /**添加系统菜单栏*/
   @SuppressWarnings("Duplicates")
   private void setMenubar(JMenuBar menuBar) {
     nameMenuLabel = new JLabel();
