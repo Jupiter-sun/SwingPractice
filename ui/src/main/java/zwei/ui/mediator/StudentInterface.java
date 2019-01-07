@@ -28,7 +28,7 @@ public class StudentInterface extends JPanel implements UserInterface {
   /** 班级显示 */
   private JLabel clLabel;
   /** 学科显示 */
-  private JLabel sjLabel;
+  private JLabel mjLabel;
 
   /** 课程下拉框 */
   private JComboBox<String> courseDropdown;
@@ -56,15 +56,15 @@ public class StudentInterface extends JPanel implements UserInterface {
     JLabel idLabelLabel = new JLabel("学号:");
     JLabel nmLabelLabel = new JLabel("姓名:");
     JLabel clLabelLabel = new JLabel("班级:");
-    JLabel sjLabelLabel = new JLabel("学科:");
+    JLabel mjLabelLabel = new JLabel("学科:");
     idLabel = new JLabel();
     nmLabel = new JLabel();
     clLabel = new JLabel();
-    sjLabel = new JLabel();
+    mjLabel = new JLabel();
     idLabelLabel.setLabelFor(idLabel);
     nmLabelLabel.setLabelFor(nmLabel);
     clLabelLabel.setLabelFor(clLabel);
-    sjLabelLabel.setLabelFor(sjLabel);
+    mjLabelLabel.setLabelFor(mjLabel);
 
     JPanel leftPanel = new JPanel();
     leftPanel.setLayout(new BoxLayout(leftPanel, BoxLayout.Y_AXIS));
@@ -84,8 +84,8 @@ public class StudentInterface extends JPanel implements UserInterface {
     leftSubSegment3.add(clLabelLabel, BorderLayout.LINE_START);
     leftSubSegment3.add(clLabel, BorderLayout.CENTER);
     leftSubSegment3.setBorder(padding);
-    leftSubSegment4.add(sjLabelLabel, BorderLayout.LINE_START);
-    leftSubSegment4.add(sjLabel, BorderLayout.CENTER);
+    leftSubSegment4.add(mjLabelLabel, BorderLayout.LINE_START);
+    leftSubSegment4.add(mjLabel, BorderLayout.CENTER);
     leftSubSegment4.setBorder(padding);
     leftPanel.add(leftSubSegment1);
     leftPanel.add(leftSubSegment2);
@@ -143,7 +143,7 @@ public class StudentInterface extends JPanel implements UserInterface {
     idLabel.setText(student.getStudentId());
     nmLabel.setText(student.getStudentName());
     clLabel.setText(student.getStudentGrade());
-    sjLabel.setText(student.getStudentSubject());
+    mjLabel.setText(student.getStudentSubject());
 
     courseListModel = new StudentCourseListModel(student);
     courseDropdown.setModel(courseListModel);

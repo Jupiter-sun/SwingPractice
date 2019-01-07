@@ -52,7 +52,8 @@ public final class UiHelper {
     return (list, value, index, isSelected, cellHasFocus) -> {
       Component c =
           renderer.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
-      ((JLabel) c).setText(toString.apply(value));
+      String textToSet = (value == null) ? "―" : toString.apply(value);
+      ((JLabel) c).setText(textToSet);
       return c;
     };
   }
